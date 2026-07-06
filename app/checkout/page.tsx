@@ -9,12 +9,16 @@ import EnableNotifications from "@/components/telegram/EnableNotifications";
 import { supabase } from "@/lib/supabase";
 import { useCartStore } from "@/lib/cartStore";
 import { useTelegramUser } from "@/hooks/useTelegramUser";
+import { useCustomer } from "@/hooks/useCustomer";
 
 export default function CheckoutPage() {
   const router = useRouter();
+
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
+
   const telegramUser = useTelegramUser();
+  const { customer, loading } = useCustomer();
 
   const [form, setForm] = useState({
     customer_name: "",
@@ -66,6 +70,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!customer) {
+      alert("Please open this app inside Telegram to earn Love Points.");
+      return;
+    }
+
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -76,6 +85,7 @@ export default function CheckoutPage() {
         latitude: form.latitude,
         longitude: form.longitude,
         telegram_chat_id: telegramUser?.id ? String(telegramUser.id) : null,
+        customer_id: customer.id,
         payment_method: form.payment_method,
         total: subtotal,
         status: "pending",
@@ -142,6 +152,22 @@ export default function CheckoutPage() {
       }
     }
 
+    const earnedPoints = Math.floor(subtotal);
+
+    const { error: pointsError } = await supabase
+      .from("customers")
+      .update({
+        phone: form.phone,
+        address: form.address,
+        love_points: (customer.love_points ?? 0) + earnedPoints,
+      })
+      .eq("id", customer.id);
+
+    if (pointsError) {
+      alert(pointsError.message);
+      return;
+    }
+
     await fetch("/api/telegram", {
       method: "POST",
       headers: {
@@ -170,16 +196,51 @@ export default function CheckoutPage() {
     <main className="min-h-screen bg-premium">
       <div className="mx-auto max-w-md px-5 pt-8 pb-28">
         <h1 className="text-4xl font-bold">Checkout</h1>
-        <p className="mt-2 text-gray-500">Delivery and payment details</p>
+
+        <p className="mt-2 text-gray-500">
+          Delivery and payment details
+        </p>
 
         <GlassCard className="mt-6 space-y-4">
-          <input placeholder="Full Name" value={form.customer_name} onChange={(e) => setForm({ ...form, customer_name: e.target.value })} className="w-full rounded-full bg-white/70 px-5 py-4 outline-none" />
-          <input placeholder="Phone Number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded-full bg-white/70 px-5 py-4 outline-none" />
-          <input placeholder="Address / Landmark" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded-full bg-white/70 px-5 py-4 outline-none" />
+          <input
+            placeholder="Full Name"
+            value={form.customer_name}
+            onChange={(e) =>
+              setForm({ ...form, customer_name: e.target.value })
+            }
+            className="w-full rounded-full bg-white/70 px-5 py-4 outline-none"
+          />
 
-          <textarea placeholder="Delivery Note (optional)" value={form.delivery_note} onChange={(e) => setForm({ ...form, delivery_note: e.target.value })} className="h-28 w-full rounded-3xl bg-white/70 px-5 py-4 outline-none" />
+          <input
+            placeholder="Phone Number"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            className="w-full rounded-full bg-white/70 px-5 py-4 outline-none"
+          />
 
-          <button type="button" onClick={handleShareLocation} className="w-full rounded-full border border-gold py-4 font-semibold text-gold">
+          <input
+            placeholder="Address / Landmark"
+            value={form.address}
+            onChange={(e) =>
+              setForm({ ...form, address: e.target.value })
+            }
+            className="w-full rounded-full bg-white/70 px-5 py-4 outline-none"
+          />
+
+          <textarea
+            placeholder="Delivery Note (optional)"
+            value={form.delivery_note}
+            onChange={(e) =>
+              setForm({ ...form, delivery_note: e.target.value })
+            }
+            className="h-28 w-full rounded-3xl bg-white/70 px-5 py-4 outline-none"
+          />
+
+          <button
+            type="button"
+            onClick={handleShareLocation}
+            className="w-full rounded-full border border-gold py-4 font-semibold text-gold"
+          >
             📍 Share My Location
           </button>
 
@@ -194,12 +255,26 @@ export default function CheckoutPage() {
           <h2 className="mb-4 text-lg font-bold">Payment Method</h2>
 
           <div className="space-y-3">
-            {["Cash on Delivery", "KHQR", "ABA Bank", "ACLEDA Bank"].map((method) => (
-              <label key={method} className="flex cursor-pointer items-center gap-3">
-                <input type="radio" name="payment" value={method} checked={form.payment_method === method} onChange={() => setForm({ ...form, payment_method: method })} />
-                <span>{method}</span>
-              </label>
-            ))}
+            {["Cash on Delivery", "KHQR", "ABA Bank", "ACLEDA Bank"].map(
+              (method) => (
+                <label
+                  key={method}
+                  className="flex cursor-pointer items-center gap-3"
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value={method}
+                    checked={form.payment_method === method}
+                    onChange={() =>
+                      setForm({ ...form, payment_method: method })
+                    }
+                  />
+
+                  <span>{method}</span>
+                </label>
+              )
+            )}
           </div>
         </GlassCard>
 
@@ -207,8 +282,15 @@ export default function CheckoutPage() {
 
         <EnableNotifications />
 
-        <button type="button" onClick={handlePlaceOrder} className="mt-6 w-full rounded-full bg-gold py-4 font-semibold text-white">
-          Place Order
+        <button
+          type="button"
+          onClick={handlePlaceOrder}
+          disabled={loading}
+          className={`mt-6 w-full rounded-full py-4 font-semibold text-white ${
+            loading ? "bg-gray-400" : "bg-gold"
+          }`}
+        >
+          {loading ? "Loading account..." : "Place Order"}
         </button>
       </div>
 
