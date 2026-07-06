@@ -1,18 +1,17 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { useEffect, useState } from "react";
 
 type Order = {
   id: number;
   total: number;
 };
 
-export default function KHQRPage() {
+function KHQRContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const orderId = searchParams.get("order");
 
   const [order, setOrder] = useState<Order | null>(null);
@@ -27,9 +26,7 @@ export default function KHQRPage() {
         .eq("id", Number(orderId))
         .single();
 
-      if (data) {
-        setOrder(data);
-      }
+      if (data) setOrder(data);
     }
 
     loadOrder();
@@ -40,9 +37,7 @@ export default function KHQRPage() {
 
     const { error } = await supabase
       .from("orders")
-      .update({
-        status: "awaiting_verification",
-      })
+      .update({ status: "awaiting_verification" })
       .eq("id", order.id);
 
     if (error) {
@@ -65,27 +60,18 @@ export default function KHQRPage() {
     });
 
     alert("Payment submitted. We'll verify it shortly.");
-
     router.push("/order-success");
   }
 
   return (
     <main className="min-h-screen bg-premium px-5 py-8">
       <div className="mx-auto max-w-md text-center">
-        <h1 className="text-4xl font-bold">
-          KHQR Payment
-        </h1>
-
-        <p className="mt-2 text-gray-500">
-          Scan the QR code below
-        </p>
+        <h1 className="text-4xl font-bold">KHQR Payment</h1>
+        <p className="mt-2 text-gray-500">Scan the QR code below</p>
 
         {order && (
           <div className="mt-6 rounded-2xl bg-white p-4 shadow">
-            <p className="font-semibold">
-              Order #{order.id}
-            </p>
-
+            <p className="font-semibold">Order #{order.id}</p>
             <p className="mt-2 text-3xl font-bold text-gold">
               ${Number(order.total).toFixed(2)}
             </p>
@@ -101,11 +87,11 @@ export default function KHQRPage() {
         </div>
 
         <p className="mt-6 text-sm text-gray-500">
-          After you've completed the payment,
-          tap the button below.
+          After you've completed the payment, tap the button below.
         </p>
 
         <button
+          type="button"
           onClick={handlePaid}
           className="mt-6 w-full rounded-full bg-gold py-4 font-semibold text-white"
         >
@@ -113,5 +99,13 @@ export default function KHQRPage() {
         </button>
       </div>
     </main>
+  );
+}
+
+export default function KHQRPage() {
+  return (
+    <Suspense fallback={null}>
+      <KHQRContent />
+    </Suspense>
   );
 }
