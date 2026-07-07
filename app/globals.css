@@ -98,3 +98,15 @@ body {
 .gold-glow {
   box-shadow: 0 0 25px rgba(201,169,106,.35);
 }
+
+/* ===========================
+   Khmer Font
+=========================== */
+
+.font-khmer {
+  font-family: var(--font-khmer), sans-serif;
+}
+
+.font-khmer {
+  font-family: "Kantumruy Pro", sans-serif;
+}
