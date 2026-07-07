@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     const { error } = await supabaseServer.storage
       .from("invoices")
-      .upload(fileName, pdfBuffer, {
+      .upload(fileName, new Uint8Array(pdfBuffer), {
         contentType: "application/pdf",
         upsert: true,
       });

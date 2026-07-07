@@ -8,6 +8,7 @@ import ThankYouGift from "@/components/home/ThankYouGift";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import FeaturedProducts from "@/components/products/FeaturedProducts";
 import TelegramProfile from "@/components/telegram/TelegramProfile";
+import TelegramDebug from "@/components/telegram/TelegramDebug";
 
 
 export default function Home() {
@@ -15,6 +16,8 @@ export default function Home() {
     <main className="min-h-screen bg-premium">
       <div className="mx-auto max-w-md px-5 pt-8 pb-28">
         <HomeHeader />
+
+        <TelegramDebug />
 
         <TelegramProfile />
 
