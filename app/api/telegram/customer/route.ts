@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import PDFDocument from "pdfkit";
-import { File } from "buffer";
 import { supabaseServer } from "@/lib/supabase-server";
 
 export const runtime = "nodejs";
@@ -18,84 +16,46 @@ Thank you for shopping with Baby Premium+ 💛
 
   packing: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-📦 Your Baby Premium+ order is being prepared.
+📦 Your order is being prepared.
 
-Our team is carefully packing your items 💛`,
+Our team is carefully packing your items.
+
+Thank you for your patience 💛`,
 
   shipping: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-🚚 Your Baby Premium+ order is on the way!
+🚚 Your order is on the way!
 
-Please keep your phone nearby.`,
+Our delivery partner is heading to your location.
+
+Please keep your phone nearby in case we need to contact you.`,
 
   delivered: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-🎉 Your Baby Premium+ order has been delivered!
+🎉 Your order has been delivered!
 
-Thank you for choosing Baby Premium+ 💛`,
+Thank you for choosing Baby Premium+ 💛
+
+We hope you and your little one enjoy your purchase.
+
+❤️ Thank you for trusting us.`,
 
   cancelled: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-❌ Your Baby Premium+ order has been cancelled.
+❌ Your order has been cancelled.
 
-Please contact us if you have any questions.`,
+If you have any questions, please contact Baby Premium+.
+
+We're always happy to help 💛`,
 };
-
-async function createInvoicePdf(order: any, items: any[]) {
-  const doc = new PDFDocument({ margin: 50 });
-  const chunks: Buffer[] = [];
-
-  doc.on("data", (chunk) => chunks.push(chunk));
-
-  const done = new Promise<Buffer>((resolve) => {
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-  });
-
-  doc.fontSize(22).text("Baby Premium+", { align: "center" });
-  doc.fontSize(16).text("Invoice", { align: "center" });
-
-  doc.moveDown();
-
-  doc.fontSize(12).text(`Invoice: ${order.order_number ?? order.id}`);
-  doc.text(`Customer: ${order.customer_name ?? "-"}`);
-  doc.text(`Phone: ${order.phone ?? "-"}`);
-  doc.text(`Payment: ${order.payment_method ?? "-"}`);
-  doc.text(`Date: ${new Date().toLocaleDateString()}`);
-
-  doc.moveDown();
-  doc.fontSize(14).text("Items");
-  doc.moveDown(0.5);
-
-  items.forEach((item) => {
-    const lineTotal = Number(item.price) * Number(item.quantity);
-
-    doc
-      .fontSize(12)
-      .text(`${item.product_name} x${item.quantity}     $${lineTotal.toFixed(2)}`);
-  });
-
-  doc.moveDown();
-
-  doc.fontSize(14).text(`Total: $${Number(order.total).toFixed(2)}`, {
-    align: "right",
-  });
-
-  doc.moveDown();
-
-  doc.fontSize(11).text("Thank you for shopping with Baby Premium+ 💛", {
-    align: "center",
-  });
-
-  doc.end();
-
-  return done;
-}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const token = process.env.TELEGRAM_BOT_TOKEN!;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+
     const chatId = body.chatId;
     const status = body.status;
     const orderId = body.orderId;
@@ -104,18 +64,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No customer Telegram ID." });
     }
 
-    const { data: order } = await supabaseServer
+    const { data: order, error: orderError } = await supabaseServer
       .from("orders")
       .select("*")
       .eq("id", orderId)
       .single();
 
-    const { data: items } = await supabaseServer
+    if (orderError || !order) {
+      return NextResponse.json(
+        { error: "Order not found." },
+        { status: 404 }
+      );
+    }
+
+    const { data: items, error: itemsError } = await supabaseServer
       .from("order_items")
       .select("*")
       .eq("order_id", orderId);
 
-    const orderNumber = order?.order_number ?? `#${orderId}`;
+    if (itemsError) {
+      return NextResponse.json(
+        { error: itemsError.message },
+        { status: 500 }
+      );
+    }
+
+    const orderNumber =
+      order.order_number ?? `BP${String(order.id).padStart(5, "0")}`;
 
     const text = `${messages[status] ?? "Your order status has been updated."}
 
@@ -132,33 +107,34 @@ export async function POST(request: Request) {
       }),
     });
 
-    if (status === "confirmed" && order && items) {
-      const pdfBuffer = await createInvoicePdf(order, items);
+    if (status === "confirmed") {
+      const invoiceResponse = await fetch(`${siteUrl}/api/invoice`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          order,
+          items: items ?? [],
+        }),
+      });
 
-      const formData = new FormData();
+      const invoiceResult = await invoiceResponse.json();
 
-      const file = new File(
-        [new Uint8Array(pdfBuffer)],
-        `Invoice_${orderNumber}.pdf`,
-        { type: "application/pdf" }
-      );
-
-      formData.append("chat_id", chatId);
-      formData.append("document", file as unknown as Blob);
-      formData.append("caption", `📄 Invoice ${orderNumber}`);
-
-      const pdfResponse = await fetch(
-        `https://api.telegram.org/bot${token}/sendDocument`,
-        {
+      if (invoiceResult?.url) {
+        await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
           method: "POST",
-          body: formData,
-        }
-      );
-
-      const pdfResult = await pdfResponse.json();
-
-      if (!pdfResult.ok) {
-        console.error("Telegram PDF error:", pdfResult);
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            document: invoiceResult.url,
+            caption: `📄 Invoice ${orderNumber}`,
+          }),
+        });
+      } else {
+        console.error("Invoice generation failed:", invoiceResult);
       }
     }
 
