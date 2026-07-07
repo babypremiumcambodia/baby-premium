@@ -9,7 +9,7 @@ export default function HomeHeader() {
         </p>
 
         <h1 className="mt-1 text-4xl font-bold tracking-tight">
-          Baby Premium
+          បេប៊ី ព្រីមៀម
         </h1>
       </div>
 
