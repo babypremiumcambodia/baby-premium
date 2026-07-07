@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import PDFDocument from "pdfkit/js/pdfkit.standalone";
 
 export async function createInvoicePdf(order: any, items: any[]) {
@@ -25,20 +27,39 @@ export async function createInvoicePdf(order: any, items: any[]) {
   const total = Number(order.total ?? subtotal);
   const lovePoints = Math.floor(total);
 
-  // Header
-  doc.fontSize(24).fillColor("#C9A227").text("Baby Premium+", {
-    align: "center",
-  });
+  const logoPath = path.join(
+    process.cwd(),
+    "public",
+    "logo",
+    "baby-premium.png"
+  );
 
+  // Logo
+  if (fs.existsSync(logoPath)) {
+    doc.image(logoPath, 190, 35, {
+      width: 210,
+    });
+
+    doc.y = 260;
+  } else {
+    doc.fontSize(24).fillColor("#C9A227").text("Baby Premium+", {
+      align: "center",
+    });
+
+    doc.moveDown();
+  }
+
+  // Tagline
   doc
     .fontSize(11)
-    .fillColor("black")
+    .fillColor("#666666")
     .text("Trusted by Parents, Loved by Babies", {
       align: "center",
     });
 
   doc.moveDown(0.5);
 
+  // Gold line
   doc
     .moveTo(50, doc.y)
     .lineTo(545, doc.y)
@@ -48,6 +69,7 @@ export async function createInvoicePdf(order: any, items: any[]) {
 
   doc.moveDown();
 
+  // Invoice title
   doc.fontSize(18).fillColor("#C9A227").text("INVOICE", {
     align: "center",
   });
@@ -58,7 +80,7 @@ export async function createInvoicePdf(order: any, items: any[]) {
 
   doc.moveDown();
 
-  // Customer information
+  // Customer info
   doc.fontSize(14).fillColor("#C9A227").text("Customer Information");
   doc.moveDown(0.4);
 
@@ -71,30 +93,31 @@ export async function createInvoicePdf(order: any, items: any[]) {
 
   doc.moveDown();
 
-  // Items
+  // Items table
   doc.fontSize(14).fillColor("#C9A227").text("Items");
   doc.moveDown(0.4);
 
+  const tableTop = doc.y;
+
   doc.fontSize(10).fillColor("black");
-  doc.text("Product", 50, doc.y, { continued: true });
-  doc.text("Qty", 330, doc.y, { continued: true });
-  doc.text("Price", 390, doc.y, { continued: true });
-  doc.text("Total", 470, doc.y);
+  doc.text("Product", 50, tableTop);
+  doc.text("Qty", 330, tableTop);
+  doc.text("Price", 390, tableTop);
+  doc.text("Total", 470, tableTop);
 
   doc
-    .moveTo(50, doc.y + 4)
-    .lineTo(545, doc.y + 4)
+    .moveTo(50, tableTop + 16)
+    .lineTo(545, tableTop + 16)
     .strokeColor("#DDDDDD")
     .lineWidth(1)
     .stroke();
 
-  doc.moveDown();
+  doc.y = tableTop + 24;
 
   items.forEach((item) => {
     const price = Number(item.price);
     const quantity = Number(item.quantity);
     const lineTotal = price * quantity;
-
     const y = doc.y;
 
     doc.fontSize(10).fillColor("black");
@@ -105,7 +128,7 @@ export async function createInvoicePdf(order: any, items: any[]) {
     doc.text(`$${price.toFixed(2)}`, 390, y);
     doc.text(`$${lineTotal.toFixed(2)}`, 470, y);
 
-    doc.moveDown(0.7);
+    doc.y = y + 24;
   });
 
   doc.moveDown();
@@ -121,7 +144,9 @@ export async function createInvoicePdf(order: any, items: any[]) {
 
   // Totals
   doc.fontSize(11).fillColor("black");
-  doc.text(`Subtotal: $${subtotal.toFixed(2)}`, { align: "right" });
+  doc.text(`Subtotal: $${subtotal.toFixed(2)}`, {
+    align: "right",
+  });
 
   doc.fontSize(15).fillColor("#C9A227").text(`TOTAL: $${total.toFixed(2)}`, {
     align: "right",
@@ -129,7 +154,7 @@ export async function createInvoicePdf(order: any, items: any[]) {
 
   doc.moveDown();
 
-  // Love Points
+  // Love points
   doc.fontSize(13).fillColor("#C9A227").text("Love Points Earned", {
     align: "center",
   });
@@ -158,9 +183,12 @@ export async function createInvoicePdf(order: any, items: any[]) {
     align: "center",
   });
 
-  doc.fontSize(10).fillColor("black").text("Trusted by Parents, Loved by Babies", {
-    align: "center",
-  });
+  doc.fontSize(10).fillColor("#666666").text(
+    "Trusted by Parents, Loved by Babies",
+    {
+      align: "center",
+    }
+  );
 
   doc.end();
 
