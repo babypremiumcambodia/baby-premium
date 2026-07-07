@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import PDFDocument from "pdfkit";
+import { supabase } from "@/lib/supabase";
 
 const messages: Record<string, string> = {
   confirmed: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
@@ -7,42 +9,86 @@ const messages: Record<string, string> = {
 
 We'll begin preparing your order shortly.
 
-Thank you for shopping with Baby Premium+ 💛`,
+Thank you for shopping with Baby Premium+ 💛
+
+📄 Your invoice is attached below.`,
 
   packing: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
+  
+📦 Your Baby Premium+ order is being prepared.
 
-📦 Your order is being prepared.
-
-Our team is carefully packing your items.
-
-Thank you for your patience 💛`,
+Our team is carefully packing your items 💛`,
 
   shipping: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-🚚 Your order is on the way!
+  🚚 Your Baby Premium+ order is on the way!
 
-Our delivery partner is heading to your location.
-
-Please keep your phone nearby in case we need to contact you.`,
+Please keep your phone nearby.`,
 
   delivered: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
+  
+🎉 Your Baby Premium+ order has been delivered!
 
-🎉 Your order has been delivered!
-
-Thank you for choosing Baby Premium+ 💛
-
-We hope you and your little one enjoy your purchase.
-
-❤️ Thank you for trusting us.`,
+Thank you for choosing Baby Premium+ 💛`,
 
   cancelled: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
+  
+❌ Your Baby Premium+ order has been cancelled.
 
-❌ Your order has been cancelled.
-
-If you have any questions, please contact Baby Premium+.
-
-We're always happy to help 💛`,
+Please contact us if you have any questions.`,
 };
+
+async function createInvoicePdf(order: any, items: any[]) {
+  const doc = new PDFDocument({ margin: 50 });
+  const chunks: Buffer[] = [];
+
+  doc.on("data", (chunk) => chunks.push(chunk));
+
+  const done = new Promise<Buffer>((resolve) => {
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+  });
+
+  doc.fontSize(22).text("Baby Premium+", { align: "center" });
+  doc.fontSize(12).text("៚ បេប៊ី ព្រីមៀម", { align: "center" });
+
+  doc.moveDown();
+  doc.fontSize(16).text("Invoice", { align: "center" });
+  doc.moveDown();
+
+  doc.fontSize(12).text(`Invoice: ${order.order_number ?? order.id}`);
+  doc.text(`Customer: ${order.customer_name ?? "-"}`);
+  doc.text(`Phone: ${order.phone ?? "-"}`);
+  doc.text(`Payment: ${order.payment_method ?? "-"}`);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`);
+
+  doc.moveDown();
+  doc.fontSize(14).text("Items");
+  doc.moveDown(0.5);
+
+  items.forEach((item) => {
+    const lineTotal = Number(item.price) * Number(item.quantity);
+
+    doc
+      .fontSize(12)
+      .text(
+        `${item.product_name} x${item.quantity}     $${lineTotal.toFixed(2)}`
+      );
+  });
+
+  doc.moveDown();
+  doc.fontSize(14).text(`Total: $${Number(order.total).toFixed(2)}`, {
+    align: "right",
+  });
+
+  doc.moveDown();
+  doc.fontSize(11).text("Thank you for shopping with Baby Premium+ 💛", {
+    align: "center",
+  });
+
+  doc.end();
+
+  return done;
+}
 
 export async function POST(request: Request) {
   try {
@@ -54,37 +100,62 @@ export async function POST(request: Request) {
     const orderId = body.orderId;
 
     if (!chatId) {
-      return NextResponse.json({
-        error: "No customer Telegram ID.",
-      });
+      return NextResponse.json({ error: "No customer Telegram ID." });
     }
+
+    const { data: order } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .single();
+
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("*")
+      .eq("order_id", orderId);
+
+    const orderNumber = order?.order_number ?? `#${orderId}`;
 
     const text = `${messages[status] ?? "Your order status has been updated."}
 
-🧾 Order: ${orderId}`;
+🧾 Order: ${orderNumber}`;
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text,
-        }),
-      }
-    );
-
-    const result = await response.json();
-
-    return NextResponse.json(result);
-  } catch {
-    return NextResponse.json(
-      {
-        error: "Failed to send customer Telegram message.",
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+      }),
+    });
+
+    if (status === "confirmed" && order && items) {
+      const pdfBuffer = await createInvoicePdf(order, items);
+
+      const formData = new FormData();
+
+      formData.append("chat_id", chatId);
+      formData.append(
+        "document",
+        new Blob([pdfBuffer], { type: "application/pdf" }),
+        `Invoice_${orderNumber}.pdf`
+      );
+      formData.append("caption", `📄 Invoice ${orderNumber}`);
+
+      await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
+        method: "POST",
+        body: formData,
+      });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: "Failed to send customer Telegram message." },
       { status: 500 }
     );
   }
