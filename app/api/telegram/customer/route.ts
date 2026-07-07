@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const messages: Record<string, string> = {
-  confirmed: `🧸 Baby Premium+
+  confirmed: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
 ✅ Your order has been confirmed!
 
@@ -9,7 +9,7 @@ We'll begin preparing your order shortly.
 
 Thank you for shopping with Baby Premium+ 💛`,
 
-  packing: `🧸 Baby Premium+
+  packing: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
 📦 Your order is being prepared.
 
@@ -17,7 +17,7 @@ Our team is carefully packing your items.
 
 Thank you for your patience 💛`,
 
-  shipping: `🧸 Baby Premium+
+  shipping: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
 🚚 Your order is on the way!
 
@@ -25,7 +25,7 @@ Our delivery partner is heading to your location.
 
 Please keep your phone nearby in case we need to contact you.`,
 
-  delivered: `🧸 Baby Premium+
+  delivered: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
 🎉 Your order has been delivered!
 
@@ -35,7 +35,7 @@ We hope you and your little one enjoy your purchase.
 
 ❤️ Thank you for trusting us.`,
 
-  cancelled: `🧸 Baby Premium+
+  cancelled: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
 ❌ Your order has been cancelled.
 
