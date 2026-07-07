@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import PDFDocument from "pdfkit";
 import { File } from "buffer";
-import { supabase } from "@/lib/supabase";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export const runtime = "nodejs";
 
@@ -104,13 +104,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No customer Telegram ID." });
     }
 
-    const { data: order } = await supabase
+    const { data: order } = await supabaseServer
       .from("orders")
       .select("*")
       .eq("id", orderId)
       .single();
 
-    const { data: items } = await supabase
+    const { data: items } = await supabaseServer
       .from("order_items")
       .select("*")
       .eq("order_id", orderId);
