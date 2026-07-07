@@ -8,7 +8,7 @@ export default function HomeHeader() {
           Good Evening
         </p>
 
-        <h1 className="mt-1 text-4xl font-bold tracking-tight">
+        <h1 className="mt-1 text-2xl font-bold tracking-tight">
           បេប៊ី ព្រីមៀម
         </h1>
       </div>
