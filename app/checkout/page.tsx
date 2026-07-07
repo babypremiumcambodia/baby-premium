@@ -66,6 +66,7 @@ export default function CheckoutPage() {
 
   async function handlePlaceOrder() {
     if (items.length === 0) {
+      console.log("Customer object:", customer);
       alert("Your cart is empty.");
       return;
     }

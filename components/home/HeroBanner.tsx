@@ -15,7 +15,7 @@ export default function HeroBanner() {
 
       <p className="mt-3 text-gray-500">
         Trusted brands from Australia,
-        New Zealand & Europe.
+        New Zealand,USA & Europe.
       </p>
 
       <button className="mt-7 flex items-center gap-2 rounded-full bg-gold px-6 py-3 font-semibold text-white">
