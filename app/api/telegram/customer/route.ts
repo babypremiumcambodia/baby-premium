@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import PDFDocument from "pdfkit";
 import { supabase } from "@/lib/supabase";
 
+export const runtime = "nodejs";
+
 const messages: Record<string, string> = {
   confirmed: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
@@ -139,7 +141,7 @@ export async function POST(request: Request) {
       formData.append("chat_id", chatId);
       formData.append(
         "document",
-        new Blob([pdfBuffer], { type: "application/pdf" }),
+        new Blob([new Uint8Array(pdfBuffer)], { type: "application/pdf" }),
         `Invoice_${orderNumber}.pdf`
       );
       formData.append("caption", `📄 Invoice ${orderNumber}`);
