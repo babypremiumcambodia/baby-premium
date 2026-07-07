@@ -8,9 +8,9 @@ export default function HomeHeader() {
           Good Evening
         </p>
 
-        <h1 className="mt-1 text-2xl font-bold tracking-tight">
-          បេប៊ី ព្រីមៀម
-        </h1>
+        <p className="font-khmer mt-1 text-sm font-medium text-gray-500 leading-none">
+  បេប៊ី ព្រីមៀម
+</p>
       </div>
 
       <div className="glass flex h-14 w-14 items-center justify-center rounded-full">
