@@ -10,8 +10,7 @@ export async function POST(request: Request) {
 
     const pdfBuffer = await createInvoicePdf(order, items);
     const orderNumber = order.order_number ?? `BP${String(order.id).padStart(5, "0")}`;
-    const fileName = `Invoice_${orderNumber}.pdf`;
-
+    const fileName = `Invoice_${orderNumber}_${Date.now()}.pdf`;
     const { error } = await supabaseServer.storage
       .from("invoices")
       .upload(fileName, new Uint8Array(pdfBuffer), {
