@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import PDFDocument from "pdfkit";
+import { File } from "buffer";
 import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -16,25 +17,25 @@ Thank you for shopping with Baby Premium+ 💛
 📄 Your invoice is attached below.`,
 
   packing: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
-  
+
 📦 Your Baby Premium+ order is being prepared.
 
 Our team is carefully packing your items 💛`,
 
   shipping: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-  🚚 Your Baby Premium+ order is on the way!
+🚚 Your Baby Premium+ order is on the way!
 
 Please keep your phone nearby.`,
 
   delivered: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
-  
+
 🎉 Your Baby Premium+ order has been delivered!
 
 Thank you for choosing Baby Premium+ 💛`,
 
   cancelled: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
-  
+
 ❌ Your Baby Premium+ order has been cancelled.
 
 Please contact us if you have any questions.`,
@@ -51,10 +52,8 @@ async function createInvoicePdf(order: any, items: any[]) {
   });
 
   doc.fontSize(22).text("Baby Premium+", { align: "center" });
-  doc.fontSize(12).text("៚ បេប៊ី ព្រីមៀម", { align: "center" });
-
-  doc.moveDown();
   doc.fontSize(16).text("Invoice", { align: "center" });
+
   doc.moveDown();
 
   doc.fontSize(12).text(`Invoice: ${order.order_number ?? order.id}`);
@@ -72,17 +71,17 @@ async function createInvoicePdf(order: any, items: any[]) {
 
     doc
       .fontSize(12)
-      .text(
-        `${item.product_name} x${item.quantity}     $${lineTotal.toFixed(2)}`
-      );
+      .text(`${item.product_name} x${item.quantity}     $${lineTotal.toFixed(2)}`);
   });
 
   doc.moveDown();
+
   doc.fontSize(14).text(`Total: $${Number(order.total).toFixed(2)}`, {
     align: "right",
   });
 
   doc.moveDown();
+
   doc.fontSize(11).text("Thank you for shopping with Baby Premium+ 💛", {
     align: "center",
   });
@@ -138,18 +137,29 @@ export async function POST(request: Request) {
 
       const formData = new FormData();
 
-      formData.append("chat_id", chatId);
-      formData.append(
-        "document",
-        new Blob([new Uint8Array(pdfBuffer)], { type: "application/pdf" }),
-        `Invoice_${orderNumber}.pdf`
+      const file = new File(
+        [new Uint8Array(pdfBuffer)],
+        `Invoice_${orderNumber}.pdf`,
+        { type: "application/pdf" }
       );
+
+      formData.append("chat_id", chatId);
+      formData.append("document", file);
       formData.append("caption", `📄 Invoice ${orderNumber}`);
 
-      await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
-        method: "POST",
-        body: formData,
-      });
+      const pdfResponse = await fetch(
+        `https://api.telegram.org/bot${token}/sendDocument`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const pdfResult = await pdfResponse.json();
+
+      if (!pdfResult.ok) {
+        console.error("Telegram PDF error:", pdfResult);
+      }
     }
 
     return NextResponse.json({ success: true });
