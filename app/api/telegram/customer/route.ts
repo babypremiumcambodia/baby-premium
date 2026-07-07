@@ -144,7 +144,7 @@ export async function POST(request: Request) {
       );
 
       formData.append("chat_id", chatId);
-      formData.append("document", file);
+      formData.append("document", file as unknown as Blob);
       formData.append("caption", `📄 Invoice ${orderNumber}`);
 
       const pdfResponse = await fetch(
