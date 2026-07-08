@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="./invoice.css" />
+</head>
+
+<body>
+  <div class="invoice">
+    <div class="header">
+      <img class="logo" src="{{logoUrl}}" />
+
+      <p class="tagline">Trusted by Parents, Loved by Babies</p>
+
+      <h1>INVOICE</h1>
+      <p class="order-number">{{orderNumber}}</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Customer</h3>
+        <p><strong>{{customerName}}</strong></p>
+        <p>{{phone}}</p>
+        <p>{{address}}</p>
+      </div>
+
+      <div class="card">
+        <h3>Order</h3>
+        <p>Date: {{date}}</p>
+        <p>Payment: {{paymentMethod}}</p>
+        <p>Status: {{status}}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th class="center">Qty</th>
+          <th class="right">Unit Price</th>
+          <th class="right">Amount</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{itemsRows}}
+      </tbody>
+    </table>
+
+    <div class="summary">
+      <div><span>Subtotal</span><span>{{subtotal}}</span></div>
+      <div><span>Delivery</span><span>FREE</span></div>
+      <div><span>Love Points</span><span>{{lovePoints}} LP</span></div>
+
+      <div class="total">
+        <span>Total</span>
+        <span>{{total}}</span>
+      </div>
+    </div>
+
+    <div class="points">
+      <p>Love Points Earned</p>
+      <h2>{{lovePoints}} LP</h2>
+    </div>
+
+    <div class="footer">
+      <strong>Baby Premium+</strong>
+      <p>Trusted by Parents, Loved by Babies</p>
+      <p>Thank you for shopping with us.</p>
+    </div>
+  </div>
+</body>
+</html>
