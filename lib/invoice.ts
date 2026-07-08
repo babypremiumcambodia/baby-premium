@@ -1,5 +1,5 @@
 import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
+import puppeteer from "puppeteer";
 import { createInvoiceHtml } from "./invoice-html";
 
 export async function createInvoicePdf(order: any, items: any[]) {
@@ -7,7 +7,6 @@ export async function createInvoicePdf(order: any, items: any[]) {
 
   const browser = await puppeteer.launch({
     headless: true,
-
     ...(isVercel
       ? {
           executablePath: await chromium.executablePath(),
@@ -17,7 +16,7 @@ export async function createInvoicePdf(order: any, items: any[]) {
           executablePath:
             process.env.CHROME_PATH ||
             "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-          args: ["--no-sandbox"],
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
         }),
   });
 
@@ -27,7 +26,7 @@ export async function createInvoicePdf(order: any, items: any[]) {
     const html = createInvoiceHtml(order, items);
 
     await page.setContent(html, {
-      waitUntil: "networkidle0",
+      waitUntil: "load",
     });
 
     const pdf = await page.pdf({
