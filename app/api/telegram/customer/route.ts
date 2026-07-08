@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
-import { createInvoicePdf } from "@/lib/invoice-old";
+import { createInvoicePdf } from "@/lib/invoice";
 
 export const runtime = "nodejs";
 
