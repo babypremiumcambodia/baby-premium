@@ -3,10 +3,22 @@ import puppeteer from "puppeteer-core";
 import { createInvoiceHtml } from "./invoice-html";
 
 export async function createInvoicePdf(order: any, items: any[]) {
+  const isVercel = !!process.env.VERCEL;
+
   const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
     headless: true,
+
+    ...(isVercel
+      ? {
+          executablePath: await chromium.executablePath(),
+          args: chromium.args,
+        }
+      : {
+          executablePath:
+            process.env.CHROME_PATH ||
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          args: ["--no-sandbox"],
+        }),
   });
 
   try {
@@ -18,18 +30,18 @@ export async function createInvoicePdf(order: any, items: any[]) {
       waitUntil: "networkidle0",
     });
 
-    const pdfBuffer = await page.pdf({
+    const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
       margin: {
-        top: "12mm",
-        right: "12mm",
-        bottom: "12mm",
-        left: "12mm",
+        top: "10mm",
+        right: "10mm",
+        bottom: "10mm",
+        left: "10mm",
       },
     });
 
-    return Buffer.from(pdfBuffer);
+    return Buffer.from(pdf);
   } finally {
     await browser.close();
   }
