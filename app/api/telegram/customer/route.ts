@@ -43,6 +43,13 @@ export async function POST(request: Request) {
     const status = body.status;
     const orderId = body.orderId;
 
+    if (!token) {
+      return NextResponse.json(
+        { error: "Missing TELEGRAM_BOT_TOKEN." },
+        { status: 500 }
+      );
+    }
+
     if (!chatId) {
       return NextResponse.json({ error: "No customer Telegram ID." });
     }
@@ -69,62 +76,94 @@ export async function POST(request: Request) {
     const orderNumber =
       order.order_number ?? `BP${String(order.id).padStart(5, "0")}`;
 
-    // 1. Send confirmation message
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: `${messages[status] ?? "Your order status has been updated."}
+    const messageText = `${messages[status] ?? "Your order status has been updated."}
 
-🧾 Order: ${orderNumber}`,
-      }),
-    });
+🧾 Order: ${orderNumber}`;
 
-    // 2. Generate + send invoice PDF only when confirmed
-    if (status === "confirmed") {
-      const pdfBuffer = await createInvoicePdf(order, items ?? []);
-
-      const fileName = `Invoice_${orderNumber}_${Date.now()}.pdf`;
-
-      const { error: uploadError } = await supabaseServer.storage
-        .from("invoices")
-        .upload(fileName, new Uint8Array(pdfBuffer), {
-          contentType: "application/pdf",
-          upsert: true,
-        });
-
-      if (uploadError) {
-        console.error("Invoice upload error:", uploadError);
-        return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    const messageResponse = await fetch(
+      `https://api.telegram.org/bot${token}/sendMessage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: messageText,
+        }),
       }
+    );
 
-      const { data } = supabaseServer.storage
-        .from("invoices")
-        .getPublicUrl(fileName);
+    const messageResult = await messageResponse.json();
 
-      const pdfSendResponse = await fetch(
-        `https://api.telegram.org/bot${token}/sendDocument`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: chatId,
-            document: data.publicUrl,
-            caption: `📄 Invoice ${orderNumber}`,
-          }),
+    if (!messageResult.ok) {
+      console.error("Telegram message error:", messageResult);
+      return NextResponse.json({ error: messageResult }, { status: 500 });
+    }
+
+    if (status === "confirmed") {
+      try {
+        console.log("Start invoice PDF");
+
+        const pdfBuffer = await createInvoicePdf(order, items ?? []);
+
+        console.log("PDF created:", pdfBuffer.length);
+
+        const fileName = `Invoice_${orderNumber}_${Date.now()}.pdf`;
+
+        const { error: uploadError } = await supabaseServer.storage
+          .from("invoices")
+          .upload(fileName, new Uint8Array(pdfBuffer), {
+            contentType: "application/pdf",
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error("Supabase upload error:", uploadError);
+          return NextResponse.json(
+            { error: uploadError.message },
+            { status: 500 }
+          );
         }
-      );
 
-      const pdfResult = await pdfSendResponse.json();
+        console.log("Uploaded invoice:", fileName);
 
-      if (!pdfResult.ok) {
-        console.error("Telegram invoice send error:", pdfResult);
-        return NextResponse.json({ error: pdfResult }, { status: 500 });
+        const { data } = supabaseServer.storage
+          .from("invoices")
+          .getPublicUrl(fileName);
+
+        console.log("Invoice public URL:", data.publicUrl);
+
+        const pdfSendResponse = await fetch(
+          `https://api.telegram.org/bot${token}/sendDocument`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chat_id: chatId,
+              document: data.publicUrl,
+              caption: `📄 Invoice ${orderNumber}`,
+            }),
+          }
+        );
+
+        const pdfResult = await pdfSendResponse.json();
+
+        console.log("Telegram PDF result:", pdfResult);
+
+        if (!pdfResult.ok) {
+          console.error("Telegram invoice send error:", pdfResult);
+          return NextResponse.json({ error: pdfResult }, { status: 500 });
+        }
+      } catch (invoiceError) {
+        console.error("Invoice PDF error:", invoiceError);
+
+        return NextResponse.json(
+          { error: "Invoice PDF failed." },
+          { status: 500 }
+        );
       }
     }
 
