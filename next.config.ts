@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
     "@sparticuz/chromium",
     "puppeteer-core",
   ],
+
+  outputFileTracingIncludes: {
+    "/api/telegram/customer/route": [
+      "./node_modules/@sparticuz/chromium/bin/**/*",
+    ],
+    "/api/invoice/route": [
+      "./node_modules/@sparticuz/chromium/bin/**/*",
+    ],
+  },
 };
 
 export default nextConfig;
