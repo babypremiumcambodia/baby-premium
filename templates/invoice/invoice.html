@@ -8,27 +8,31 @@
 <body>
   <div class="invoice">
     <div class="header">
-      <img class="logo" src="{{logoUrl}}" />
+      <div>
+        <img class="logo" src="{{logoUrl}}" />
+        <p class="tagline">Trusted by Parents, Loved by Babies</p>
+      </div>
 
-      <p class="tagline">Trusted by Parents and Loved by Babies</p>
-
-      <h1>INVOICE</h1>
-      <p class="order-number">{{orderNumber}}</p>
+      <div class="header-right">
+        <h1>INVOICE</h1>
+        <p>{{orderNumber}}</p>
+        <p>{{date}}</p>
+      </div>
     </div>
 
-    <div class="cards">
-      <div class="card">
+    <div class="info-grid">
+      <div class="info-card">
         <h3>Customer</h3>
         <p><strong>{{customerName}}</strong></p>
         <p>{{phone}}</p>
         <p>{{address}}</p>
       </div>
 
-      <div class="card">
+      <div class="info-card">
         <h3>Order</h3>
-        <p>Date: {{date}}</p>
         <p>Payment: {{paymentMethod}}</p>
         <p>Status: {{status}}</p>
+        <p>Love Points: {{lovePoints}} LP</p>
       </div>
     </div>
 
@@ -52,21 +56,16 @@
       <div><span>Delivery</span><span>FREE</span></div>
       <div><span>Love Points</span><span>{{lovePoints}} LP</span></div>
 
-      <div class="total">
+      <div class="grand-total">
         <span>Total</span>
         <span>{{total}}</span>
       </div>
     </div>
 
-    <div class="points">
-      <p>Love Points Earned</p>
-      <h2>{{lovePoints}} LP</h2>
-    </div>
-
     <div class="footer">
-      <strong>Baby Premium+</strong>
-      <p>Trusted by Parents and Loved by Babies</p>
-      <p>Thank you for shopping with us.</p>
+      <p class="thanks">Thank you for shopping with Baby Premium+</p>
+      <p>Trusted by Parents, Loved by Babies</p>
+      <p>Telegram Mini App</p>
     </div>
   </div>
 </body>
