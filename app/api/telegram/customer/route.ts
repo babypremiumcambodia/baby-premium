@@ -81,14 +81,7 @@ export async function POST(request: Request) {
 
     const { data: items, error: itemsError } = await supabaseServer
       .from("order_items")
-      .select(`
-        *,
-        products (
-          name,
-          brand,
-          image
-        )
-      `)
+      .select("*")
       .eq("order_id", orderId);
 
     if (itemsError) {
