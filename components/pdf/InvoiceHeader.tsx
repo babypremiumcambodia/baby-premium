@@ -38,7 +38,7 @@ export default function InvoiceHeader({
 }: {
   orderNumber: string;
 }) {
-  const logoUrl = "/logo/baby-premium.png";
+  const logoUrl = "data:image/png;base64,PASTE_BASE64_HERE";
 
   return (
     <>
