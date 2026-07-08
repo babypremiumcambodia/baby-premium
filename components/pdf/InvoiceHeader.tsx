@@ -35,14 +35,14 @@ const styles = StyleSheet.create({
 
 export default function InvoiceHeader({
   orderNumber,
+  logoBase64,
 }: {
   orderNumber: string;
+  logoBase64: string | null;
 }) {
-  const logoUrl = "data:image/png;base64,PASTE_BASE64_HERE";
-
   return (
     <>
-      <Image src={logoUrl} style={styles.logo} />
+      {logoBase64 && <Image src={logoBase64} style={styles.logo} />}
 
       <Text style={styles.tagline}>
         Trusted by Parents, Loved by Babies
