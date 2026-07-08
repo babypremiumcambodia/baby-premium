@@ -33,52 +33,48 @@ export function createInvoiceHtml(order: any, items: any[]) {
     0
   );
 
+  const tax = 0;
   const total = Number(order.total ?? subtotal);
-  const lovePoints = Math.floor(total);
 
   const rows = items
-  .map((item: any, index: number) => {
-    const price = Number(item.price);
-    const qty = Number(item.quantity);
-    const lineTotal = price * qty;
+    .map((item: any) => {
+      const price = Number(item.price);
+      const qty = Number(item.quantity);
+      const lineTotal = price * qty;
 
-    return `
-<tr>
-    <td>
-        <div class="product">
-            <div class="product-number">#${index + 1}</div>
+      const imageUrl = item.products?.image || "";
 
-            <div class="product-info">
-                <div class="product-name">
-                    ${escapeHtml(item.product_name)}
-                </div>
+      return `
+        <tr>
+          <td>
+            ${
+              imageUrl
+                ? `<img class="product-image" src="${escapeHtml(imageUrl)}" />`
+                : `<div class="image-placeholder">No Image</div>`
+            }
+          </td>
 
-                <div class="product-brand">
-                    ${escapeHtml(item.brand ?? "")}
-                </div>
-            </div>
-        </div>
-    </td>
+          <td>
+            <strong>${escapeHtml(item.product_name)}</strong>
+            <div class="brand">${escapeHtml(item.products?.brand ?? "")}</div>
+          </td>
 
-    <td class="center">
-        ${qty}
-    </td>
+          <td class="center">${qty}</td>
+          <td class="right">${money(price)}</td>
+          <td class="right"><strong>${money(lineTotal)}</strong></td>
+        </tr>
+      `;
+    })
+    .join("");
 
-    <td class="right">
-        ${money(price)}
-    </td>
-
-    <td class="right total-price">
-        ${money(lineTotal)}
-    </td>
-</tr>
-`;
-  })
-  .join("");
   const logoUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/brands/logo/baby-premium.png`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(
+    "https://t.me/babypremiumbabybot"
+  )}`;
 
   const values: Record<string, string> = {
     "{{logoUrl}}": logoUrl,
+    "{{qrUrl}}": qrUrl,
     "{{orderNumber}}": escapeHtml(orderNumber),
     "{{customerName}}": escapeHtml(order.customer_name || "-"),
     "{{phone}}": escapeHtml(order.phone || "-"),
@@ -86,10 +82,11 @@ export function createInvoiceHtml(order: any, items: any[]) {
     "{{date}}": new Date().toLocaleDateString(),
     "{{paymentMethod}}": escapeHtml(order.payment_method || "-"),
     "{{status}}": escapeHtml(order.status || "confirmed"),
+    "{{deliveryMethod}}": escapeHtml(order.delivery_method || "Standard Delivery"),
     "{{itemsRows}}": rows,
     "{{subtotal}}": money(subtotal),
+    "{{tax}}": money(tax),
     "{{total}}": money(total),
-    "{{lovePoints}}": String(lovePoints),
   };
 
   for (const [key, value] of Object.entries(values)) {

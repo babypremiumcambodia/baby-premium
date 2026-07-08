@@ -17,22 +17,37 @@ Thank you for shopping with Baby Premium+ 💛
 
   packing: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-📦 Your order is being prepared.`,
+📦 Your order is being prepared.
+
+Our team is carefully packing your items.
+
+Thank you for your patience 💛`,
 
   shipping: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-🚚 Your order is on the way!`,
+🚚 Your order is on the way!
+
+Our delivery partner is heading to your location.
+
+Please keep your phone nearby in case we need to contact you.`,
 
   delivered: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
 🎉 Your order has been delivered!
 
-Thank you for choosing Baby Premium+ 💛`,
+Thank you for choosing Baby Premium+ 💛
+
+We hope you and your little one enjoy your purchase`,
 
   cancelled: `🧸 Baby Premium ៚ បេប៊ី ព្រីមៀម
 
-❌ Your order has been cancelled.`,
+❌ Your order has been cancelled.
+
+If you have any questions, please contact Baby Premium+.
+
+We're always happy to help 💛`,
 };
+
 
 export async function POST(request: Request) {
   try {
@@ -66,7 +81,14 @@ export async function POST(request: Request) {
 
     const { data: items, error: itemsError } = await supabaseServer
       .from("order_items")
-      .select("*")
+      .select(`
+        *,
+        products (
+          name,
+          brand,
+          image
+        )
+      `)
       .eq("order_id", orderId);
 
     if (itemsError) {
@@ -76,20 +98,16 @@ export async function POST(request: Request) {
     const orderNumber =
       order.order_number ?? `BP${String(order.id).padStart(5, "0")}`;
 
-    const messageText = `${messages[status] ?? "Your order status has been updated."}
-
-🧾 Order: ${orderNumber}`;
-
     const messageResponse = await fetch(
       `https://api.telegram.org/bot${token}/sendMessage`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: messageText,
+          text: `${messages[status] ?? "Your order status has been updated."}
+
+🧾 Order: ${orderNumber}`,
         }),
       }
     );
@@ -105,7 +123,7 @@ export async function POST(request: Request) {
       try {
         console.log("Start invoice PDF");
 
-        const pdfBuffer = await createInvoicePdf(order, items ?? []);
+        const pdfBuffer = await createInvoicePdf(order, (items ?? []) as any[]);
 
         console.log("PDF created:", pdfBuffer.length);
 
@@ -126,21 +144,15 @@ export async function POST(request: Request) {
           );
         }
 
-        console.log("Uploaded invoice:", fileName);
-
         const { data } = supabaseServer.storage
           .from("invoices")
           .getPublicUrl(fileName);
-
-        console.log("Invoice public URL:", data.publicUrl);
 
         const pdfSendResponse = await fetch(
           `https://api.telegram.org/bot${token}/sendDocument`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               chat_id: chatId,
               document: data.publicUrl,
