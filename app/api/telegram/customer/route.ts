@@ -48,7 +48,6 @@ If you have any questions, please contact Baby Premium+.
 We're always happy to help 💛`,
 };
 
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -88,6 +87,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
     }
 
+    const productIds = [
+      ...new Set((items ?? []).map((item: any) => item.product_id).filter(Boolean)),
+    ];
+
+    const { data: products, error: productsError } = productIds.length
+      ? await supabaseServer
+          .from("products")
+          .select("id,name,brand,image")
+          .in("id", productIds)
+      : { data: [], error: null };
+
+    if (productsError) {
+      console.error("Products fetch error:", productsError);
+    }
+
+    const productMap = new Map(
+      (products ?? []).map((product: any) => [product.id, product])
+    );
+
+    const invoiceItems = (items ?? []).map((item: any) => ({
+      ...item,
+      product: productMap.get(item.product_id) ?? null,
+    }));
+
     const orderNumber =
       order.order_number ?? `BP${String(order.id).padStart(5, "0")}`;
 
@@ -116,7 +139,7 @@ export async function POST(request: Request) {
       try {
         console.log("Start invoice PDF");
 
-        const pdfBuffer = await createInvoicePdf(order, (items ?? []) as any[]);
+        const pdfBuffer = await createInvoicePdf(order, invoiceItems);
 
         console.log("PDF created:", pdfBuffer.length);
 

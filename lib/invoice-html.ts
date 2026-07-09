@@ -42,7 +42,7 @@ export function createInvoiceHtml(order: any, items: any[]) {
       const qty = Number(item.quantity);
       const lineTotal = price * qty;
 
-      const imageUrl = item.products?.image || "";
+      const imageUrl = item.product?.image || "";
 
       return `
         <tr>
@@ -56,7 +56,7 @@ export function createInvoiceHtml(order: any, items: any[]) {
 
           <td>
             <strong>${escapeHtml(item.product_name)}</strong>
-            <div class="brand">${escapeHtml(item.products?.brand ?? "")}</div>
+            <div class="brand">${escapeHtml(item.product?.brand ?? "")}</div>
           </td>
 
           <td class="center">${qty}</td>
