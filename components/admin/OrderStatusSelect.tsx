@@ -20,8 +20,11 @@ export default function OrderStatusSelect({
   currentStatus: string;
 }) {
   const [status, setStatus] = useState(currentStatus);
+  const [saving, setSaving] = useState(false);
 
   async function handleSave() {
+    setSaving(true);
+
     const { data: order, error: loadError } = await supabase
       .from("orders")
       .select("telegram_chat_id")
@@ -30,6 +33,7 @@ export default function OrderStatusSelect({
 
     if (loadError) {
       alert(loadError.message);
+      setSaving(false);
       return;
     }
 
@@ -40,6 +44,7 @@ export default function OrderStatusSelect({
 
     if (error) {
       alert(error.message);
+      setSaving(false);
       return;
     }
 
@@ -57,29 +62,40 @@ export default function OrderStatusSelect({
       });
     }
 
+    setSaving(false);
     alert("Order status updated!");
   }
 
   return (
-    <div className="mt-4">
-      <select
-        value={status}
-        onChange={(e) => setStatus(e.target.value)}
-        className="w-full rounded-xl border p-4"
-      >
-        {statuses.map((item) => (
-          <option key={item} value={item}>
-            {item}
-          </option>
-        ))}
-      </select>
+    <div className="mt-4 space-y-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {statuses.map((item) => {
+          const active = status === item;
+
+          return (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setStatus(item)}
+              className={`rounded-full border px-4 py-3 text-sm font-semibold capitalize transition ${
+                active
+                  ? "border-gold bg-gold text-white shadow-lg"
+                  : "border-white/40 bg-white/40 hover:bg-white/70"
+              }`}
+            >
+              {item}
+            </button>
+          );
+        })}
+      </div>
 
       <button
         type="button"
         onClick={handleSave}
-        className="mt-4 w-full rounded-full bg-gold py-3 font-semibold text-white"
+        disabled={saving}
+        className="w-full rounded-full bg-gold py-3 font-semibold text-white disabled:opacity-60"
       >
-        Save Status
+        {saving ? "Saving..." : "Save Changes"}
       </button>
     </div>
   );

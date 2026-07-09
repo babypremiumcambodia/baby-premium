@@ -5,6 +5,7 @@ import Link from "next/link";
 import GlassCard from "@/components/ui/GlassCard";
 import { supabase } from "@/lib/supabase";
 import StatusBadge from "@/components/admin/StatusBadge";
+import AdminBackButton from "@/components/admin/AdminBackButton";
 
 export default async function AdminOrdersPage() {
   const { data: orders, error } = await supabase

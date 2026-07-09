@@ -2,10 +2,11 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import { supabase } from "@/lib/supabase";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
+import AdminBackButton from "@/components/admin/AdminBackButton";
+
 
 export default async function AdminOrderDetailPage({
   params,
@@ -37,18 +38,15 @@ export default async function AdminOrderDetailPage({
     <main className="min-h-screen bg-premium">
       <div className="mx-auto max-w-3xl px-5 py-8">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <Link
-            href="/admin/orders"
-            className="rounded-full bg-white p-3 shadow"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+        <div className="mb-6">
+  <AdminBackButton />
+</div>
 
-          <h1 className="text-4xl font-bold">
-            Order #{order.id}
-          </h1>
-        </div>
+<div className="mb-8">
+  <h1 className="text-4xl font-bold">
+    Order #{order.id}
+  </h1>
+</div>
 
         {/* Customer */}
         <GlassCard>
