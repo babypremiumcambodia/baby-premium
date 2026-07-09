@@ -1,5 +1,5 @@
 import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import { createInvoiceHtml } from "./invoice-html";
 
 export async function createInvoicePdf(order: any, items: any[]) {

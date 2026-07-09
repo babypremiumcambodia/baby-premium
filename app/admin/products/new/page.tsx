@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import BarcodeScanner from "@/components/admin/BarcodeScanner";
+import AdminBackButton from "@/components/admin/AdminBackButton";
+import BarcodeInput from "@/components/admin/BarcodeInput";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -85,16 +84,14 @@ export default function NewProductPage() {
   return (
     <main className="min-h-screen bg-premium">
       <div className="mx-auto max-w-xl px-5 py-8">
-        <div className="mb-8 flex items-center gap-4">
-          <Link
-            href="/admin/products"
-            className="rounded-full bg-white p-3 shadow"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+      
+            <div className="mb-6">
+  <AdminBackButton />
+</div>
 
-          <h1 className="text-4xl font-bold">Add Product</h1>
-        </div>
+<div className="mb-8">
+  <h1 className="text-4xl font-bold">Add Product</h1>
+</div>
 
         <div className="space-y-4">
           <input
@@ -137,22 +134,15 @@ export default function NewProductPage() {
             className="w-full rounded-xl border p-4"
           />
 
-          <input
-            name="barcode"
-            placeholder="Barcode"
-            value={form.barcode}
-            onChange={handleChange}
-            className="w-full rounded-xl border p-4"
-          />
-
-          <BarcodeScanner
-            onDetected={(code) =>
-              setForm((prev) => ({
-                ...prev,
-                barcode: code,
-              }))
-            }
-          />
+          <BarcodeInput
+  value={form.barcode}
+  onChange={(code) =>
+    setForm((prev) => ({
+      ...prev,
+      barcode: code,
+    }))
+  }
+/>
 
           <label className="block rounded-xl border bg-white p-4">
             <span className="font-semibold">Upload Product Image</span>
