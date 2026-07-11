@@ -6,26 +6,26 @@ import { supabaseServer } from "@/lib/supabase-server";
 import AdminBackButton from "@/components/admin/AdminBackButton";
 import GlassCard from "@/components/ui/GlassCard";
 
+type CustomerRelation = {
+  id: number;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+};
+
+type RewardRelation = {
+  id: number;
+  name: string;
+  image: string | null;
+};
+
 type Redemption = {
   id: number;
   points_spent: number;
   status: string;
   created_at: string;
-  customers:
-    | {
-        id: number;
-        first_name: string | null;
-        last_name: string | null;
-        phone: string | null;
-      }
-    | null;
-  rewards:
-    | {
-        id: number;
-        name: string;
-        image: string | null;
-      }
-    | null;
+  customers: CustomerRelation[] | null;
+  rewards: RewardRelation[] | null;
 };
 
 export default async function RewardRedemptionsPage() {
@@ -50,8 +50,6 @@ export default async function RewardRedemptionsPage() {
     `)
     .order("created_at", { ascending: false });
 
-  const redemptions = (data ?? []) as Redemption[];
-
   if (error) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-premium">
@@ -59,6 +57,8 @@ export default async function RewardRedemptionsPage() {
       </main>
     );
   }
+
+  const redemptions = (data ?? []) as unknown as Redemption[];
 
   return (
     <main className="min-h-screen bg-premium">
@@ -77,8 +77,11 @@ export default async function RewardRedemptionsPage() {
 
         <div className="space-y-5">
           {redemptions.map((redemption) => {
-            const firstName = redemption.customers?.first_name ?? "";
-            const lastName = redemption.customers?.last_name ?? "";
+            const customer = redemption.customers?.[0] ?? null;
+            const reward = redemption.rewards?.[0] ?? null;
+
+            const firstName = customer?.first_name ?? "";
+            const lastName = customer?.last_name ?? "";
 
             const customerName =
               `${firstName} ${lastName}`.trim() || "Unknown customer";
@@ -87,13 +90,20 @@ export default async function RewardRedemptionsPage() {
               redemption.status.charAt(0).toUpperCase() +
               redemption.status.slice(1);
 
+            const statusClasses =
+              redemption.status === "pending"
+                ? "bg-yellow-100 text-yellow-700"
+                : redemption.status === "approved"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700";
+
             return (
               <GlassCard key={redemption.id}>
                 <div className="flex items-start gap-4">
-                  {redemption.rewards?.image ? (
+                  {reward?.image ? (
                     <img
-                      src={redemption.rewards.image}
-                      alt={redemption.rewards.name}
+                      src={reward.image}
+                      alt={reward.name}
                       className="h-20 w-20 flex-shrink-0 rounded-2xl border bg-white object-contain p-2"
                     />
                   ) : (
@@ -104,14 +114,14 @@ export default async function RewardRedemptionsPage() {
 
                   <div className="min-w-0 flex-1">
                     <h2 className="text-xl font-bold">
-                      {redemption.rewards?.name ?? "Deleted reward"}
+                      {reward?.name ?? "Deleted reward"}
                     </h2>
 
                     <p className="mt-2 font-semibold">{customerName}</p>
 
-                    {redemption.customers?.phone && (
+                    {customer?.phone && (
                       <p className="mt-1 text-sm text-gray-500">
-                        {redemption.customers.phone}
+                        {customer.phone}
                       </p>
                     )}
 
@@ -125,13 +135,7 @@ export default async function RewardRedemptionsPage() {
 
                     <div className="mt-4 flex items-center justify-between gap-3">
                       <span
-                        className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                          redemption.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : redemption.status === "approved"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                        }`}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold ${statusClasses}`}
                       >
                         {statusLabel}
                       </span>
