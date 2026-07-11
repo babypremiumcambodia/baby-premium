@@ -67,15 +67,35 @@ export default function RewardsPage() {
         }),
       });
 
-      const result = await response.json();
+      const responseText = await response.text();
+
+let result: {
+  error?: string;
+  remainingPoints?: number;
+};
+
+try {
+  result = JSON.parse(responseText);
+} catch {
+  console.error("Unexpected redeem response:", responseText);
+
+  alert(
+    response.status === 404
+      ? "Reward API route was not found."
+      : "The server returned an invalid response."
+  );
+
+  return;
+}
 
       if (!response.ok) {
         alert(result.error ?? "Failed to redeem reward.");
         return;
       }
 
-      setDisplayedPoints(result.remainingPoints);
-      setSelectedReward(null);
+      setDisplayedPoints(
+  Number(result.remainingPoints ?? displayedPoints)
+);
 
       alert("Reward request sent successfully!");
     } catch (error) {
