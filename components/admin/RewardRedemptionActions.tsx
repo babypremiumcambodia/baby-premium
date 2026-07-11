@@ -11,6 +11,7 @@ export default function RewardRedemptionActions({
   redemptionId,
 }: Props) {
   const router = useRouter();
+
   const [loading, setLoading] = useState<
     "approve" | "cancel" | null
   >(null);
