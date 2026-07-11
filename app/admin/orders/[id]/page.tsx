@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import Link from "next/link";
 import GlassCard from "@/components/ui/GlassCard";
 import { supabase } from "@/lib/supabase";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
@@ -39,14 +38,14 @@ export default async function AdminOrderDetailPage({
       <div className="mx-auto max-w-3xl px-5 py-8">
         {/* Header */}
         <div className="mb-6">
-  <AdminBackButton />
-</div>
+        <AdminBackButton />
+        </div>
 
-<div className="mb-8">
-  <h1 className="text-4xl font-bold">
-    Order #{order.id}
-  </h1>
-</div>
+        <div className="mb-8">
+        <h1 className="text-4xl font-bold">
+        Order #{order.id}
+        </h1>
+        </div>
 
         {/* Customer */}
         <GlassCard>
@@ -93,14 +92,14 @@ export default async function AdminOrderDetailPage({
                   </p>
                 </div>
 
-                <a
-                  href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block rounded-full bg-gold py-3 text-center font-semibold text-white transition hover:opacity-90"
-                >
-                  📍 Open in Google Maps
-                </a>
+               <a
+  href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-3 block w-full rounded-full bg-gold py-3 text-center font-semibold text-white transition-all duration-200 hover:scale-[1.02] active:scale-95"
+>
+  📍 Open in Google Maps
+</a>
               </>
             )}
           </div>

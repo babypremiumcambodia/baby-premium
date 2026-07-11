@@ -13,15 +13,22 @@ export default function AdminBackButton() {
       className="
         glass
         inline-flex
+        cursor-pointer
         items-center
         gap-2
-        rounded-xl
-        px-4
-        py-2
+        rounded-full
+        border
+        border-white/40
+        px-5
+        py-3
         text-sm
-        font-medium
+        font-semibold
+        shadow-lg
         transition-all
-        hover:scale-105
+        duration-200
+        hover:scale-[1.03]
+        hover:shadow-xl
+        active:scale-95
       "
     >
       <ArrowLeft size={18} />
