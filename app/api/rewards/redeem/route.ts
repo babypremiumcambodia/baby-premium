@@ -12,8 +12,12 @@ export async function POST(request: Request) {
 
     if (!customerId || !rewardId) {
       return NextResponse.json(
-        { error: "Missing customer or reward information." },
-        { status: 400 }
+        {
+          error: "Missing customer or reward information.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
@@ -27,8 +31,13 @@ export async function POST(request: Request) {
       console.error("Customer lookup error:", customerError);
 
       return NextResponse.json(
-        { error: "Customer not found." },
-        { status: 404 }
+        {
+          error: "Customer not found.",
+          details: customerError,
+        },
+        {
+          status: 404,
+        }
       );
     }
 
@@ -42,8 +51,13 @@ export async function POST(request: Request) {
       console.error("Reward lookup error:", rewardError);
 
       return NextResponse.json(
-        { error: "Reward not found." },
-        { status: 404 }
+        {
+          error: "Reward not found.",
+          details: rewardError,
+        },
+        {
+          status: 404,
+        }
       );
     }
 
@@ -52,12 +66,22 @@ export async function POST(request: Request) {
 
     if (currentPoints < requiredPoints) {
       return NextResponse.json(
-        { error: "You do not have enough Love Points." },
-        { status: 400 }
+        {
+          error: "You do not have enough Love Points.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
     const remainingPoints = currentPoints - requiredPoints;
+
+    console.log("Creating reward redemption:", {
+      customerId: customer.id,
+      rewardId: reward.id,
+      pointsSpent: requiredPoints,
+    });
 
     const { data: redemption, error: redemptionError } =
       await supabaseServer
@@ -67,20 +91,36 @@ export async function POST(request: Request) {
           reward_id: reward.id,
           points_spent: requiredPoints,
           status: "approved",
+          fulfilled: false,
+          fulfilled_at: null,
         })
         .select("id")
         .single();
 
-    if (redemptionError || !redemption) {
-      console.error("Redemption insert error:", redemptionError);
+    if (redemptionError) {
+      console.error("========== REDEMPTION INSERT ERROR ==========");
+      console.error(redemptionError);
+      console.error("=============================================");
 
       return NextResponse.json(
         {
-          error:
-            redemptionError?.message ??
-            "Failed to create the reward redemption.",
+          error: redemptionError.message,
+          details: redemptionError,
         },
-        { status: 500 }
+        {
+          status: 500,
+        }
+      );
+    }
+
+    if (!redemption) {
+      return NextResponse.json(
+        {
+          error: "Reward redemption was not created.",
+        },
+        {
+          status: 500,
+        }
       );
     }
 
@@ -100,8 +140,13 @@ export async function POST(request: Request) {
         .eq("id", redemption.id);
 
       return NextResponse.json(
-        { error: pointsError.message },
-        { status: 500 }
+        {
+          error: pointsError.message,
+          details: pointsError,
+        },
+        {
+          status: 500,
+        }
       );
     }
 
@@ -120,8 +165,12 @@ export async function POST(request: Request) {
     console.error("Reward redemption API error:", error);
 
     return NextResponse.json(
-      { error: "Failed to redeem the reward." },
-      { status: 500 }
+      {
+        error: "Failed to redeem the reward.",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
