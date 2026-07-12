@@ -12,23 +12,18 @@ export default function RewardRedemptionActions({
 }: Props) {
   const router = useRouter();
 
-  const [loading, setLoading] = useState<
-    "approve" | "cancel" | null
-  >(null);
+  const [loading, setLoading] = useState(false);
 
-  async function updateStatus(action: "approve" | "cancel") {
-    const message =
-      action === "approve"
-        ? "Approve this reward request?"
-        : "Cancel this request and return the Love Points?";
+  async function markIncluded() {
+    if (!confirm("Mark this gift as included with the customer's order?")) {
+      return;
+    }
 
-    if (!confirm(message)) return;
-
-    setLoading(action);
+    setLoading(true);
 
     try {
       const response = await fetch(
-        "/api/rewards/redemptions/update",
+        "/api/rewards/redemptions/fulfill",
         {
           method: "POST",
           headers: {
@@ -36,7 +31,6 @@ export default function RewardRedemptionActions({
           },
           body: JSON.stringify({
             redemptionId,
-            action,
           }),
         }
       );
@@ -44,44 +38,29 @@ export default function RewardRedemptionActions({
       const result = await response.json();
 
       if (!response.ok) {
-        alert(result.error ?? "Failed to update request.");
+        alert(result.error ?? "Failed to update reward.");
         return;
       }
 
-      alert(
-        action === "approve"
-          ? "Reward request approved."
-          : "Reward request cancelled and Love Points returned."
-      );
+      alert("Gift marked as included.");
 
       router.refresh();
     } catch (error) {
       console.error(error);
       alert("Something went wrong.");
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <button
-        type="button"
-        disabled={loading !== null}
-        onClick={() => updateStatus("cancel")}
-        className="rounded-full bg-red-100 py-3 font-semibold text-red-700 disabled:opacity-50"
-      >
-        {loading === "cancel" ? "Cancelling..." : "Cancel"}
-      </button>
-
-      <button
-        type="button"
-        disabled={loading !== null}
-        onClick={() => updateStatus("approve")}
-        className="rounded-full bg-gold py-3 font-semibold text-white disabled:opacity-50"
-      >
-        {loading === "approve" ? "Approving..." : "Approve"}
-      </button>
-    </div>
+    <button
+      type="button"
+      disabled={loading}
+      onClick={markIncluded}
+      className="w-full rounded-full bg-gold py-3 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+    >
+      {loading ? "Saving..." : "Gift Included"}
+    </button>
   );
 }

@@ -25,17 +25,16 @@ export default async function RewardRedemptionDetailPage({
     .from("reward_redemptions")
     .select(`
       id,
-      customer_id,
-      reward_id,
       points_spent,
       status,
+      fulfilled,
+      fulfilled_at,
       created_at,
       customers (
         id,
         first_name,
         last_name,
         phone,
-        telegram_user_id,
         love_points
       ),
       rewards (
@@ -65,10 +64,6 @@ export default async function RewardRedemptionDetailPage({
     `${customer?.first_name ?? ""} ${customer?.last_name ?? ""}`.trim() ||
     "Unknown customer";
 
-  const statusLabel =
-    redemption.status.charAt(0).toUpperCase() +
-    redemption.status.slice(1);
-
   return (
     <main className="min-h-screen bg-premium">
       <div className="mx-auto max-w-3xl px-5 py-8">
@@ -77,10 +72,10 @@ export default async function RewardRedemptionDetailPage({
         </div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-bold">Reward Request</h1>
+          <h1 className="text-4xl font-bold">Reward Redemption</h1>
 
           <p className="mt-2 text-gray-500">
-            Review and manage this redemption request.
+            Review the redeemed gift and mark it as included.
           </p>
         </div>
 
@@ -143,7 +138,7 @@ export default async function RewardRedemptionDetailPage({
             </div>
 
             <div>
-              <p className="text-sm text-gray-500">Requested</p>
+              <p className="text-sm text-gray-500">Redeemed At</p>
 
               <p>
                 {new Date(redemption.created_at).toLocaleString()}
@@ -153,27 +148,37 @@ export default async function RewardRedemptionDetailPage({
         </GlassCard>
 
         <GlassCard className="mt-5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-gray-500">Status</p>
+              <p className="text-sm text-gray-500">Gift Status</p>
 
-              <p className="mt-1 text-xl font-bold">{statusLabel}</p>
+              <p className="mt-1 text-xl font-bold">
+                {redemption.fulfilled ? "Included" : "Waiting to Include"}
+              </p>
             </div>
 
             <span
               className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                redemption.status === "pending"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : redemption.status === "approved"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
+                redemption.fulfilled
+                  ? "bg-green-100 text-green-700"
+                  : "bg-yellow-100 text-yellow-700"
               }`}
             >
-              {statusLabel}
+              {redemption.fulfilled ? "Included" : "Waiting"}
             </span>
           </div>
 
-          {redemption.status === "pending" && (
+          {redemption.fulfilled && redemption.fulfilled_at && (
+            <div className="mt-5 rounded-2xl bg-white/50 p-4">
+              <p className="text-sm text-gray-500">Included At</p>
+
+              <p className="mt-1 font-semibold">
+                {new Date(redemption.fulfilled_at).toLocaleString()}
+              </p>
+            </div>
+          )}
+
+          {!redemption.fulfilled && (
             <div className="mt-6">
               <RewardRedemptionActions
                 redemptionId={redemption.id}
