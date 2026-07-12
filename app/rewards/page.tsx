@@ -137,11 +137,11 @@ export default function RewardsPage() {
           <h1 className="text-4xl font-bold">Thank You Gifts</h1>
 
           <p className="mt-3 text-base text-gray-500">
-            Every purchase earns Love Points.
+            Every love points and gifts
           </p>
 
           <p className="mt-1 text-base text-gray-500">
-            Redeem them for exclusive gifts from Baby Premium+.
+            Collect points every time you shop with Baby Premium.
           </p>
         </div>
 
