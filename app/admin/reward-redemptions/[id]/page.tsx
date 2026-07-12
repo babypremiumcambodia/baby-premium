@@ -6,6 +6,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import AdminBackButton from "@/components/admin/AdminBackButton";
 import GlassCard from "@/components/ui/GlassCard";
 import RewardRedemptionActions from "@/components/admin/RewardRedemptionActions";
+import { formatDate } from "@/lib/date";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -141,7 +142,7 @@ export default async function RewardRedemptionDetailPage({
               <p className="text-sm text-gray-500">Redeemed At</p>
 
               <p>
-                {new Date(redemption.created_at).toLocaleString()}
+                {formatDate(redemption.created_at)}
               </p>
             </div>
           </div>
@@ -173,7 +174,7 @@ export default async function RewardRedemptionDetailPage({
               <p className="text-sm text-gray-500">Included At</p>
 
               <p className="mt-1 font-semibold">
-                {new Date(redemption.fulfilled_at).toLocaleString()}
+                {formatDate(redemption.fulfilled_at)}
               </p>
             </div>
           )}

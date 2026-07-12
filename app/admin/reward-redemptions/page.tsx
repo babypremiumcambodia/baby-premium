@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase-server";
 import AdminBackButton from "@/components/admin/AdminBackButton";
 import GlassCard from "@/components/ui/GlassCard";
+import { formatDate } from "@/lib/date";
 
 type CustomerRelation = {
   id: number;
@@ -130,7 +131,7 @@ export default async function RewardRedemptionsPage() {
                     </p>
 
                     <p className="mt-2 text-sm text-gray-500">
-                      {new Date(redemption.created_at).toLocaleString()}
+                       {formatDate(redemption.created_at)}
                     </p>
 
                     <div className="mt-4 flex items-center justify-between gap-3">
