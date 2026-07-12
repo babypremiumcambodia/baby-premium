@@ -15,12 +15,30 @@ type Reward = {
   points_required: number;
 };
 
+type RedeemedReward = {
+  name: string;
+  image: string | null;
+  pointsSpent: number;
+};
+
+type RedeemResult = {
+  error?: string;
+  remainingPoints?: number;
+  reward?: {
+    name: string;
+    image: string | null;
+    pointsSpent: number;
+  };
+};
+
 export default function RewardsPage() {
   const { customer, loading: customerLoading } = useCustomer();
 
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardsLoading, setRewardsLoading] = useState(true);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
+  const [redeemedReward, setRedeemedReward] =
+    useState<RedeemedReward | null>(null);
   const [displayedPoints, setDisplayedPoints] = useState(0);
   const [redeeming, setRedeeming] = useState(false);
 
@@ -69,35 +87,41 @@ export default function RewardsPage() {
 
       const responseText = await response.text();
 
-let result: {
-  error?: string;
-  remainingPoints?: number;
-};
+      let result: RedeemResult;
 
-try {
-  result = JSON.parse(responseText);
-} catch {
-  console.error("Unexpected redeem response:", responseText);
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        console.error("Unexpected redeem response:", responseText);
 
-  alert(
-    response.status === 404
-      ? "Reward API route was not found."
-      : "The server returned an invalid response."
-  );
+        alert(
+          response.status === 404
+            ? "Reward API route was not found."
+            : "The server returned an invalid response."
+        );
 
-  return;
-}
+        return;
+      }
 
       if (!response.ok) {
         alert(result.error ?? "Failed to redeem reward.");
         return;
       }
 
-      setDisplayedPoints(
-  Number(result.remainingPoints ?? displayedPoints)
-);
+      const remainingPoints = Number(
+        result.remainingPoints ?? displayedPoints
+      );
 
-      alert("Reward request sent successfully!");
+      setDisplayedPoints(remainingPoints);
+
+      setRedeemedReward({
+        name: result.reward?.name ?? selectedReward.name,
+        image: result.reward?.image ?? selectedReward.image,
+        pointsSpent:
+          result.reward?.pointsSpent ?? selectedReward.points_required,
+      });
+
+      setSelectedReward(null);
     } catch (error) {
       console.error("Redeem error:", error);
       alert("Something went wrong. Please try again.");
@@ -124,7 +148,9 @@ try {
         <GlassCard>
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-gray-500">Your Love Points</p>
+              <p className="text-sm text-gray-500">
+                Your Love Points
+              </p>
 
               <h2 className="mt-2 text-4xl font-bold text-gold">
                 {customerLoading ? "..." : `${displayedPoints} LP`}
@@ -174,7 +200,9 @@ try {
                     )}
 
                     <div className="min-w-0 flex-1">
-                      <h2 className="text-xl font-bold">{reward.name}</h2>
+                      <h2 className="text-xl font-bold">
+                        {reward.name}
+                      </h2>
 
                       {reward.description && (
                         <p className="mt-1 text-sm leading-6 text-gray-500">
@@ -216,7 +244,9 @@ try {
           {!rewardsLoading && rewards.length === 0 && (
             <GlassCard>
               <div className="py-10 text-center">
-                <h2 className="text-xl font-bold">No Gifts Available Yet</h2>
+                <h2 className="text-xl font-bold">
+                  No Gifts Available Yet
+                </h2>
 
                 <p className="mt-2 text-gray-500">
                   New thank you gifts will appear here soon.
@@ -238,6 +268,63 @@ try {
           }}
           onRedeem={handleRedeem}
         />
+      )}
+
+      {redeemedReward && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 px-5 backdrop-blur-md">
+          <div className="w-full max-w-sm rounded-[32px] border border-white/60 bg-white/85 p-6 text-center shadow-2xl backdrop-blur-2xl">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/70 bg-white/60 text-4xl shadow-lg">
+              ✓
+            </div>
+
+            <h2 className="mt-5 text-3xl font-bold">
+              Redeemed Successfully
+            </h2>
+
+            <p className="mt-2 text-gray-500">
+              Your thank you gift has been redeemed.
+            </p>
+
+            {redeemedReward.image && (
+              <img
+                src={redeemedReward.image}
+                alt={redeemedReward.name}
+                className="mx-auto mt-6 h-36 w-36 rounded-2xl bg-white object-contain p-3"
+              />
+            )}
+
+            <h3 className="mt-5 text-xl font-bold">
+              {redeemedReward.name}
+            </h3>
+
+            <p className="mt-2 font-semibold text-gold">
+              {redeemedReward.pointsSpent} Love Points
+            </p>
+
+            <div className="mt-5 rounded-2xl bg-white/60 p-4">
+              <p className="text-sm text-gray-500">
+                Remaining Balance
+              </p>
+
+              <p className="mt-1 text-2xl font-bold text-gold">
+                {displayedPoints} LP
+              </p>
+            </div>
+
+            <p className="mt-5 text-sm leading-6 text-gray-500">
+              Baby Premium+ will include your gift with your upcoming
+              order.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setRedeemedReward(null)}
+              className="mt-6 w-full rounded-full bg-gold py-4 font-semibold text-white transition hover:opacity-90"
+            >
+              Done
+            </button>
+          </div>
+        </div>
       )}
 
       <BottomNavigation />

@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     const { data: reward, error: rewardError } = await supabaseServer
       .from("rewards")
-      .select("id, name, points_required")
+      .select("id, name, image, points_required")
       .eq("id", rewardId)
       .single();
 
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
           customer_id: customer.id,
           reward_id: reward.id,
           points_spent: requiredPoints,
-          status: "pending",
+          status: "approved",
         })
         .select("id")
         .single();
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
         {
           error:
             redemptionError?.message ??
-            "Failed to create the reward request.",
+            "Failed to create the reward redemption.",
         },
         { status: 500 }
       );
@@ -109,6 +109,12 @@ export async function POST(request: Request) {
       success: true,
       redemptionId: redemption.id,
       remainingPoints,
+      reward: {
+        id: reward.id,
+        name: reward.name,
+        image: reward.image,
+        pointsSpent: requiredPoints,
+      },
     });
   } catch (error) {
     console.error("Reward redemption API error:", error);
