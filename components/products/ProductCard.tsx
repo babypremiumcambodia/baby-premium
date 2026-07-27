@@ -11,6 +11,7 @@ import { useCartStore } from "@/lib/cartStore";
 type ProductProps = {
   id: number;
   name: string;
+  brand?: string | null;
   price: number;
   image: string;
   stock?: number;
@@ -19,6 +20,7 @@ type ProductProps = {
 export default function ProductCard({
   id,
   name,
+  brand,
   price,
   image,
   stock = 0,
@@ -37,82 +39,99 @@ export default function ProductCard({
   const outOfStock = stock <= 0;
 
   return (
-    <Link href={`/product/${id}`}>
-      <GlassCard className="p-4">
+    <Link href={`/product/${id}`} className="block h-full">
+      <GlassCard className="flex h-full flex-col rounded-[28px] p-4">
         <div className="relative">
           <Image
             src={image}
             alt={name}
-            width={220}
-            height={220}
-            className="mx-auto object-contain"
+            width={180}
+            height={180}
+            className="mx-auto h-36 w-full object-contain"
           />
-
-          <button
-            type="button"
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              toggleItem(id);
-            }}
-            className="absolute right-2 top-2 rounded-full bg-white/70 p-2"
-          >
-            <Heart
-              className={`h-5 w-5 ${
-                favoriteActive ? "fill-red-500 text-red-500" : "text-gray-400"
-              }`}
-            />
-          </button>
         </div>
 
-        <h3 className="mt-4 font-semibold">{name}</h3>
-
-        <p className="mt-2 text-xl font-bold text-gold">
-          ${price.toFixed(2)}
-        </p>
-
-        <div className="mt-2">
-          {stock === 0 ? (
-            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600">
-              🔴 Out of Stock
-            </span>
-          ) : stock <= 5 ? (
-            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-600">
-              🟠 Only a Few Left
-            </span>
-          ) : (
-            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-              🟢 In Stock
-            </span>
+        <div className="flex flex-1 flex-col">
+          {brand && (
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">
+              {brand}
+            </p>
           )}
+
+          <h3 className="mt-1 line-clamp-2 min-h-[42px] text-[15px] font-semibold leading-5 text-slate-900">
+            {name}
+          </h3>
+
+          <p className="mt-1 text-xl font-bold tracking-tight text-gold">
+            ${price.toFixed(2)}
+          </p>
+
+          <div className="mt-2">
+            {outOfStock ? (
+              <span className="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600">
+                Out of Stock
+              </span>
+            ) : stock <= 5 ? (
+              <span className="inline-flex rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-semibold text-orange-600">
+                Few Left
+              </span>
+            ) : (
+              <span className="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700">
+                In Stock
+              </span>
+            )}
+          </div>
+
+          <div className="mt-auto flex gap-2 pt-4">
+            <button
+              type="button"
+              disabled={outOfStock}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const added = addItem({
+                  id,
+                  name,
+                  price,
+                  image,
+                  stock,
+                });
+
+                if (!added) {
+                  alert(`Only ${stock} items are available.`);
+                }
+              }}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-3 text-xs font-semibold text-white transition ${
+                outOfStock
+                  ? "cursor-not-allowed bg-gray-400"
+                  : "bg-gold hover:opacity-90 active:scale-[0.98]"
+              }`}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {outOfStock ? "Unavailable" : "Add"}
+            </button>
+
+            <button
+              type="button"
+              aria-label="Toggle favorite"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleItem(id);
+              }}
+              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/80 shadow-md backdrop-blur-xl transition active:scale-95"
+            >
+              <Heart
+                className={`h-5 w-5 ${
+                  favoriteActive
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-400"
+                }`}
+              />
+            </button>
+          </div>
         </div>
-
-        <button
-          type="button"
-          disabled={outOfStock}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            const added = addItem({
-              id,
-              name,
-              price,
-              image,
-              stock,
-            });
-
-            if (!added) {
-              alert(`Only ${stock} items are available.`);
-            }
-          }}
-          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-full py-3 font-semibold text-white ${
-            outOfStock ? "bg-gray-400" : "bg-gold"
-          }`}
-        >
-          <ShoppingCart className="h-5 w-5" />
-          {outOfStock ? "Out of Stock" : "Add to Cart"}
-        </button>
       </GlassCard>
     </Link>
   );

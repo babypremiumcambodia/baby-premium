@@ -5,7 +5,7 @@ export default function HomeHeader() {
     <header className="flex items-center justify-between">
       <div>
         <p className="text-sm text-gray-500">
-          Good Evening
+          Welcome
         </p>
 
         <p className="font-khmer mt-1 text-sm font-medium text-gray-500 leading-none">

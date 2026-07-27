@@ -49,7 +49,7 @@ export default function ProfilePage() {
               )}
 
               <p className="mt-2 font-semibold text-gold">
-                ❤️ {customer?.love_points ?? 0} Love Points
+                {customer?.love_points ?? 0} Love Points
               </p>
 
               {/* Debug */}

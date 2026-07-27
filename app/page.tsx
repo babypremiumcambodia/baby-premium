@@ -1,17 +1,16 @@
 import HomeHeader from "@/components/home/HomeHeader";
 import HeroBanner from "@/components/home/HeroBanner";
 import SearchBar from "@/components/home/SearchBar";
-import PopularBrands from "@/components/brands/PopularBrands";
 import LovePointsCard from "@/components/home/LovePointsCard";
 import CategoryGrid from "@/components/home/CategoryGrid";
-import ThankYouGift from "@/components/home/ThankYouGift";
 import BottomNavigation from "@/components/layout/BottomNavigation";
-import FeaturedProducts from "@/components/products/FeaturedProducts";
+import FeaturedProducts from "@/components/home/FeaturedProducts";
 import TelegramProfile from "@/components/telegram/TelegramProfile";
-import TelegramDebug from "@/components/telegram/TelegramDebug";
+import { getProducts } from "@/lib/products";
 
+export default async function Home() {
+  const products = await getProducts();
 
-export default function Home() {
   return (
     <main className="min-h-screen bg-premium">
       <div className="mx-auto max-w-md px-5 pt-8 pb-28">
@@ -23,19 +22,14 @@ export default function Home() {
 
         <SearchBar />
 
-        <PopularBrands />
-
         <LovePointsCard />
 
-        <ThankYouGift />
-
-        <FeaturedProducts />
-
         <CategoryGrid />
+
+        <FeaturedProducts products={products} />
       </div>
 
       <BottomNavigation />
-
     </main>
   );
 }

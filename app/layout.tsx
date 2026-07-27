@@ -5,7 +5,6 @@ import "@fontsource/kantumruy-pro/500.css";
 import "@fontsource/kantumruy-pro/600.css";
 import "@fontsource/kantumruy-pro/700.css";
 import "./globals.css";
-import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,28 +17,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Baby Premium",
+  title: "Baby Premium+",
   description: "Premium Baby Store",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="km"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
-        <Script
+      <head>
+        <script
           src="https://telegram.org/js/telegram-web-app.js"
-          strategy="beforeInteractive"
+          async
         />
+      </head>
 
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

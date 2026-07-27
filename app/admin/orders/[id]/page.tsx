@@ -92,14 +92,14 @@ export default async function AdminOrderDetailPage({
                   </p>
                 </div>
 
-               <a
-  href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="mt-3 block w-full rounded-full bg-gold py-3 text-center font-semibold text-white transition-all duration-200 hover:scale-[1.02] active:scale-95"
->
-  📍 Open in Google Maps
-</a>
+                <a
+                  href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-full bg-gold py-3 text-center font-semibold text-white transition hover:opacity-90"
+                >
+                  📍 Open in Google Maps
+                </a>
               </>
             )}
           </div>

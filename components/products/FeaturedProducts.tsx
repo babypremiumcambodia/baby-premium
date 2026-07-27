@@ -1,19 +1,37 @@
 import ProductCard from "./ProductCard";
-import { products } from "@/data/products";
+import { getProducts } from "@/lib/products";
 
-export default function FeaturedProducts() {
+export default async function FeaturedProducts() {
+  const products = await getProducts();
+
+  const featuredProducts = products.slice(0, 6);
+
+  if (featuredProducts.length === 0) {
+    return null;
+  }
+
   return (
     <section className="mt-10">
-      <h2 className="mb-5 text-2xl font-bold">Featured Products</h2>
+      <div className="mb-5">
+        <h2 className="text-2xl font-bold">
+          Featured Products
+        </h2>
 
-      <div className="grid gap-5">
-        {products.map((product) => (
+        <p className="mt-1 text-sm text-gray-500">
+          Our most popular products
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        {featuredProducts.map((product) => (
           <ProductCard
-            id={product.id}
             key={product.id}
+            id={Number(product.id)}
             name={product.name}
-            price={product.price}
+            brand={product.brand ?? null}
+            price={Number(product.price)}
             image={product.image}
+            stock={Number(product.stock ?? 0)}
           />
         ))}
       </div>
