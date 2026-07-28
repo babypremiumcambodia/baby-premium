@@ -7,6 +7,7 @@ import { Heart, ShoppingCart } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import { useWishlistStore } from "@/lib/wishlistStore";
 import { useCartStore } from "@/lib/cartStore";
+import { useLanguage } from "@/components/language/LanguageProvider";
 
 type ProductProps = {
   id: number;
@@ -26,6 +27,7 @@ export default function ProductCard({
   stock = 0,
 }: ProductProps) {
   const [mounted, setMounted] = useState(false);
+  const { language } = useLanguage();
 
   const toggleItem = useWishlistStore((state) => state.toggleItem);
   const isFavorite = useWishlistStore((state) => state.isFavorite(id));
@@ -69,15 +71,15 @@ export default function ProductCard({
           <div className="mt-2">
             {outOfStock ? (
               <span className="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600">
-                Out of Stock
+                {language === "km" ? "អស់ពីស្តុក" : "Out of Stock"}
               </span>
             ) : stock <= 5 ? (
               <span className="inline-flex rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-semibold text-orange-600">
-                Few Left
+                {language === "km" ? "នៅសល់តិច" : "Few Left"}
               </span>
             ) : (
               <span className="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700">
-                In Stock
+                {language === "km" ? "មានស្តុក" : "In Stock"}
               </span>
             )}
           </div>
@@ -99,7 +101,11 @@ export default function ProductCard({
                 });
 
                 if (!added) {
-                  alert(`Only ${stock} items are available.`);
+                  alert(
+                    language === "km"
+                      ? `មានផលិតផលតែ ${stock} ប៉ុណ្ណោះក្នុងស្តុក។`
+                      : `Only ${stock} items are available.`
+                  );
                 }
               }}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-3 text-xs font-semibold text-white transition ${
@@ -109,12 +115,23 @@ export default function ProductCard({
               }`}
             >
               <ShoppingCart className="h-4 w-4" />
-              {outOfStock ? "Unavailable" : "Add"}
+
+              {outOfStock
+                ? language === "km"
+                  ? "មិនមាន"
+                  : "Unavailable"
+                : language === "km"
+                  ? "ទិញឥឡូវនេះ"
+                  : "Add"}
             </button>
 
             <button
               type="button"
-              aria-label="Toggle favorite"
+              aria-label={
+                language === "km"
+                  ? "បន្ថែម ឬដកចេញពីចំណូលចិត្ត"
+                  : "Toggle favorite"
+              }
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();

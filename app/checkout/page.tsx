@@ -2,17 +2,43 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import GlassCard from "@/components/ui/GlassCard";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import EnableNotifications from "@/components/telegram/EnableNotifications";
+import { useLanguage } from "@/components/language/LanguageProvider";
 import { supabase } from "@/lib/supabase";
 import { useCartStore } from "@/lib/cartStore";
 import { useTelegramUser } from "@/hooks/useTelegramUser";
 import { useCustomer } from "@/hooks/useCustomer";
 
+const paymentMethods = [
+  {
+    value: "Cash on Delivery",
+    en: "Cash on Delivery",
+    km: "បង់ប្រាក់ពេលទទួលទំនិញ",
+  },
+  {
+    value: "KHQR",
+    en: "KHQR",
+    km: "KHQR",
+  },
+  {
+    value: "ABA Bank",
+    en: "ABA Bank",
+    km: "ធនាគារ ABA",
+  },
+  {
+    value: "ACLEDA Bank",
+    en: "ACLEDA Bank",
+    km: "ធនាគារ អេស៊ីលីដា",
+  },
+];
+
 export default function CheckoutPage() {
   const router = useRouter();
+  const { language } = useLanguage();
 
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
@@ -38,27 +64,35 @@ export default function CheckoutPage() {
 
   function handleShareLocation() {
     if (!navigator.geolocation) {
-      setForm((prev) => ({
-        ...prev,
-        location_status: "Location is not supported on this device.",
+      setForm((previous) => ({
+        ...previous,
+        location_status:
+          language === "km"
+            ? "ឧបករណ៍នេះមិនគាំទ្រការចែករំលែកទីតាំងទេ។"
+            : "Location is not supported on this device.",
       }));
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setForm((prev) => ({
-          ...prev,
+        setForm((previous) => ({
+          ...previous,
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-          location_status: "✅ Location shared successfully",
+          location_status:
+            language === "km"
+              ? "✅ បានចែករំលែកទីតាំងដោយជោគជ័យ"
+              : "✅ Location shared successfully",
         }));
       },
       () => {
-        setForm((prev) => ({
-          ...prev,
+        setForm((previous) => ({
+          ...previous,
           location_status:
-            "⚠️ Could not get location. You can still place the order.",
+            language === "km"
+              ? "⚠️ មិនអាចទទួលទីតាំងបានទេ។ អ្នកនៅតែអាចបញ្ជាទិញបាន។"
+              : "⚠️ Could not get location. You can still place the order.",
         }));
       }
     );
@@ -66,13 +100,20 @@ export default function CheckoutPage() {
 
   async function handlePlaceOrder() {
     if (items.length === 0) {
-      console.log("Customer object:", customer);
-      alert("Your cart is empty.");
+      alert(
+        language === "km"
+          ? "កន្ត្រករបស់អ្នកទទេ។"
+          : "Your cart is empty."
+      );
       return;
     }
 
     if (!customer) {
-      alert("Please open this app inside Telegram to earn Love Points.");
+      alert(
+        language === "km"
+          ? "សូមបើកកម្មវិធីនេះក្នុង Telegram ដើម្បីទទួលបាន Love Points។"
+          : "Please open this app inside Telegram to earn Love Points."
+      );
       return;
     }
 
@@ -85,7 +126,9 @@ export default function CheckoutPage() {
         delivery_note: form.delivery_note,
         latitude: form.latitude,
         longitude: form.longitude,
-        telegram_chat_id: telegramUser?.id ? String(telegramUser.id) : null,
+        telegram_chat_id: telegramUser?.id
+          ? String(telegramUser.id)
+          : null,
         customer_id: customer.id,
         payment_method: form.payment_method,
         total: subtotal,
@@ -138,7 +181,11 @@ export default function CheckoutPage() {
       const newStock = Number(product.stock) - item.quantity;
 
       if (newStock < 0) {
-        alert(`${item.name} does not have enough stock.`);
+        alert(
+          language === "km"
+            ? `${item.name} មិនមានស្តុកគ្រប់គ្រាន់ទេ។`
+            : `${item.name} does not have enough stock.`
+        );
         return;
       }
 
@@ -160,7 +207,8 @@ export default function CheckoutPage() {
       .update({
         phone: form.phone,
         address: form.address,
-        love_points: (customer.love_points ?? 0) + earnedPoints,
+        love_points:
+          (customer.love_points ?? 0) + earnedPoints,
       })
       .eq("id", customer.id);
 
@@ -193,89 +241,182 @@ export default function CheckoutPage() {
     }
   }
 
+  const inputClassName = `w-full rounded-full bg-white/70 px-5 py-4 outline-none ${
+    language === "km" ? "font-khmer leading-7" : ""
+  }`;
+
   return (
     <main className="min-h-screen bg-premium">
-      <div className="mx-auto max-w-md px-5 pt-8 pb-28">
-        <h1 className="text-4xl font-bold">Checkout</h1>
+      <div className="mx-auto max-w-md px-5 pb-28 pt-8">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className={`mb-5 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/50 px-4 py-2 text-sm font-semibold text-[#7a4f16] shadow-sm backdrop-blur-xl transition active:scale-95 ${
+            language === "km" ? "font-khmer leading-7" : ""
+          }`}
+        >
+          <ArrowLeft className="h-4 w-4" />
 
-        <p className="mt-2 text-gray-500">
-          Delivery and payment details
+          {language === "km" ? "ត្រឡប់ក្រោយ" : "Back"}
+        </button>
+
+        <h1
+          className={`font-bold ${
+            language === "km"
+              ? "font-khmer text-3xl leading-[1.6]"
+              : "text-4xl leading-tight"
+          }`}
+        >
+          {language === "km" ? "បញ្ជាទិញ" : "Checkout"}
+        </h1>
+
+        <p
+          className={`text-gray-500 ${
+            language === "km"
+              ? "font-khmer mt-3 text-sm leading-7"
+              : "mt-2 text-sm leading-6"
+          }`}
+        >
+          {language === "km"
+            ? "បញ្ចូលព័ត៌មានដឹកជញ្ជូន និងវិធីបង់ប្រាក់"
+            : "Enter your delivery and payment details."}
         </p>
 
         <GlassCard className="mt-6 space-y-4">
           <input
-            placeholder="Full Name"
+            type="text"
+            placeholder={
+              language === "km" ? "ឈ្មោះពេញ" : "Full Name"
+            }
             value={form.customer_name}
-            onChange={(e) =>
-              setForm({ ...form, customer_name: e.target.value })
+            onChange={(event) =>
+              setForm({
+                ...form,
+                customer_name: event.target.value,
+              })
             }
-            className="w-full rounded-full bg-white/70 px-5 py-4 outline-none"
+            className={inputClassName}
           />
 
           <input
-            placeholder="Phone Number"
+            type="tel"
+            placeholder={
+              language === "km" ? "លេខទូរស័ព្ទ" : "Phone Number"
+            }
             value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full rounded-full bg-white/70 px-5 py-4 outline-none"
+            onChange={(event) =>
+              setForm({ ...form, phone: event.target.value })
+            }
+            className={inputClassName}
           />
 
           <input
-            placeholder="Address / Landmark"
-            value={form.address}
-            onChange={(e) =>
-              setForm({ ...form, address: e.target.value })
+            type="text"
+            placeholder={
+              language === "km"
+                ? "អាសយដ្ឋាន ឬទីតាំងសម្គាល់"
+                : "Address / Landmark"
             }
-            className="w-full rounded-full bg-white/70 px-5 py-4 outline-none"
+            value={form.address}
+            onChange={(event) =>
+              setForm({ ...form, address: event.target.value })
+            }
+            className={inputClassName}
           />
 
           <textarea
-            placeholder="Delivery Note (optional)"
-            value={form.delivery_note}
-            onChange={(e) =>
-              setForm({ ...form, delivery_note: e.target.value })
+            placeholder={
+              language === "km"
+                ? "កំណត់សម្គាល់សម្រាប់ការដឹកជញ្ជូន (មិនចាំបាច់)"
+                : "Delivery Note (optional)"
             }
-            className="h-28 w-full rounded-3xl bg-white/70 px-5 py-4 outline-none"
+            value={form.delivery_note}
+            onChange={(event) =>
+              setForm({
+                ...form,
+                delivery_note: event.target.value,
+              })
+            }
+            className={`h-28 w-full rounded-3xl bg-white/70 px-5 py-4 outline-none ${
+              language === "km"
+                ? "font-khmer leading-7"
+                : ""
+            }`}
           />
 
           <button
             type="button"
             onClick={handleShareLocation}
-            className="w-full rounded-full border border-gold py-4 font-semibold text-gold"
+            className={`w-full rounded-full border border-gold py-4 font-semibold text-gold ${
+              language === "km"
+                ? "font-khmer leading-7"
+                : ""
+            }`}
           >
-            📍 Share My Location
+            📍{" "}
+            {language === "km"
+              ? "ចែករំលែកទីតាំងរបស់ខ្ញុំ"
+              : "Share My Location"}
           </button>
 
           {form.location_status && (
-            <p className="text-center text-sm text-gray-500">
+            <p
+              className={`text-center text-sm text-gray-500 ${
+                language === "km"
+                  ? "font-khmer leading-7"
+                  : "leading-6"
+              }`}
+            >
               {form.location_status}
             </p>
           )}
         </GlassCard>
 
         <GlassCard className="mt-6">
-          <h2 className="mb-4 text-lg font-bold">Payment Method</h2>
+          <h2
+            className={`mb-4 text-lg font-bold ${
+              language === "km"
+                ? "font-khmer leading-8"
+                : ""
+            }`}
+          >
+            {language === "km"
+              ? "វិធីបង់ប្រាក់"
+              : "Payment Method"}
+          </h2>
 
           <div className="space-y-3">
-            {["Cash on Delivery", "KHQR", "ABA Bank", "ACLEDA Bank"].map(
-              (method) => (
-                <label
-                  key={method}
-                  className="flex cursor-pointer items-center gap-3"
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value={method}
-                    checked={form.payment_method === method}
-                    onChange={() =>
-                      setForm({ ...form, payment_method: method })
-                    }
-                  />
+            {paymentMethods.map((method) => (
+              <label
+                key={method.value}
+                className="flex cursor-pointer items-center gap-3"
+              >
+                <input
+                  type="radio"
+                  name="payment"
+                  value={method.value}
+                  checked={
+                    form.payment_method === method.value
+                  }
+                  onChange={() =>
+                    setForm({
+                      ...form,
+                      payment_method: method.value,
+                    })
+                  }
+                />
 
-                  <span>{method}</span>
-                </label>
-              )
-            )}
+                <span
+                  className={
+                    language === "km"
+                      ? "font-khmer leading-7"
+                      : ""
+                  }
+                >
+                  {method[language]}
+                </span>
+              </label>
+            ))}
           </div>
         </GlassCard>
 
@@ -289,9 +430,19 @@ export default function CheckoutPage() {
           disabled={loading}
           className={`mt-6 w-full rounded-full py-4 font-semibold text-white ${
             loading ? "bg-gray-400" : "bg-gold"
+          } ${
+            language === "km"
+              ? "font-khmer leading-7"
+              : ""
           }`}
         >
-          {loading ? "Loading account..." : "Place Order"}
+          {loading
+            ? language === "km"
+              ? "កំពុងផ្ទុកគណនី..."
+              : "Loading account..."
+            : language === "km"
+              ? "បញ្ជាក់ការបញ្ជាទិញ"
+              : "Place Order"}
         </button>
       </div>
 

@@ -2,20 +2,48 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShoppingBag, Heart, ShoppingCart, User } from "lucide-react";
+import {
+  Home,
+  ShoppingBag,
+  Heart,
+  ShoppingCart,
+  User,
+} from "lucide-react";
 import { useCartStore } from "@/lib/cartStore";
+import { useLanguage } from "@/components/language/LanguageProvider";
 
 const navItems = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/shop", label: "Shop", icon: ShoppingBag },
-  { href: "/rewards", label: "Rewards", icon: Heart },
-  { href: "/cart", label: "Cart", icon: ShoppingCart },
-  { href: "/profile", label: "Me", icon: User },
+  {
+    href: "/",
+    label: { en: "Home", km: "ទំព័រដើម" },
+    icon: Home,
+  },
+  {
+    href: "/shop",
+    label: { en: "Shop", km: "ហាង" },
+    icon: ShoppingBag,
+  },
+  {
+    href: "/rewards",
+    label: { en: "Rewards", km: "រង្វាន់" },
+    icon: Heart,
+  },
+  {
+    href: "/cart",
+    label: { en: "Cart", km: "កន្ត្រក" },
+    icon: ShoppingCart,
+  },
+  {
+    href: "/profile",
+    label: { en: "Me", km: "ខ្ញុំ" },
+    icon: User,
+  },
 ];
 
 export default function BottomNavigation() {
   const pathname = usePathname();
   const items = useCartStore((state) => state.items);
+  const { language } = useLanguage();
 
   const cartCount = items.reduce(
     (total, item) => total + item.quantity,
@@ -26,13 +54,17 @@ export default function BottomNavigation() {
     <nav className="glass fixed bottom-5 left-1/2 z-50 flex w-[92%] max-w-md -translate-x-1/2 items-center justify-around rounded-[32px] px-3 py-3">
       {navItems.map((item) => {
         const Icon = item.icon;
-        const active = pathname === item.href;
+
+        const active =
+          item.href === "/"
+            ? pathname === "/"
+            : pathname.startsWith(item.href);
 
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-1 ${
+            className={`flex min-w-0 flex-1 flex-col items-center gap-1 ${
               active ? "text-gold" : "text-gray-500"
             }`}
           >
@@ -44,13 +76,15 @@ export default function BottomNavigation() {
               />
 
               {item.href === "/cart" && cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                   {cartCount}
                 </span>
               )}
             </div>
 
-            <span className="text-[11px] font-medium">{item.label}</span>
+            <span className="max-w-full truncate text-[10px] font-medium">
+              {item.label[language]}
+            </span>
           </Link>
         );
       })}

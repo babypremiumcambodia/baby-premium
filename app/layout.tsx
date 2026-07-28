@@ -4,6 +4,8 @@ import "@fontsource/kantumruy-pro/400.css";
 import "@fontsource/kantumruy-pro/500.css";
 import "@fontsource/kantumruy-pro/600.css";
 import "@fontsource/kantumruy-pro/700.css";
+import { LanguageProvider } from "@/components/language/LanguageProvider";
+import LanguageSwitcher from "@/components/language/LanguageSwitcher";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,8 +30,9 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="km"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <script
@@ -38,7 +41,15 @@ export default function RootLayout({
         />
       </head>
 
-      <body>{children}</body>
+      <body>
+        <LanguageProvider>
+          <div className="fixed right-4 top-4 z-[100]">
+            <LanguageSwitcher />
+          </div>
+
+          {children}
+        </LanguageProvider>
+      </body>
     </html>
   );
 }

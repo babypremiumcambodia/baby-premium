@@ -9,109 +9,167 @@ import {
   User,
   Truck,
 } from "lucide-react";
-
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import GlassCard from "@/components/ui/GlassCard";
 import { useCustomer } from "@/hooks/useCustomer";
+import { useLanguage } from "@/components/language/LanguageProvider";
 
 export default function ProfilePage() {
   const { customer, loading } = useCustomer();
+  const { language } = useLanguage();
 
   const displayName = loading
-    ? "Loading..."
+    ? language === "km"
+      ? "កំពុងផ្ទុក..."
+      : "Loading..."
     : customer
-      ? `${customer.first_name ?? ""} ${customer.last_name ?? ""}`.trim() ||
+      ? `${customer.first_name ?? ""} ${
+          customer.last_name ?? ""
+        }`.trim() ||
         customer.username ||
-        "Baby Premium Member"
-      : "Guest User";
+        (language === "km"
+          ? "សមាជិក Baby Premium+"
+          : "Baby Premium+ Member")
+      : language === "km"
+        ? "អ្នកប្រើប្រាស់"
+        : "Guest User";
+
+  const menuTextClass =
+    language === "km"
+      ? "font-khmer font-semibold leading-7"
+      : "font-semibold";
 
   return (
     <main className="min-h-screen bg-premium">
-      <div className="mx-auto max-w-md px-5 pt-8 pb-28">
-        <h1 className="text-4xl font-bold">My Profile</h1>
+      <div className="mx-auto max-w-md px-5 pb-28 pt-8">
+        <h1
+          className={`font-bold ${
+            language === "km"
+              ? "font-khmer text-3xl leading-[1.6]"
+              : "text-4xl leading-tight"
+          }`}
+        >
+          {language === "km"
+            ? "ប្រវត្តិរូបរបស់ខ្ញុំ"
+            : "My Profile"}
+        </h1>
 
-        {/* Customer Card */}
+        <p
+          className={`text-gray-500 ${
+            language === "km"
+              ? "font-khmer mt-3 text-sm leading-7"
+              : "mt-2 text-sm leading-6"
+          }`}
+        >
+          {language === "km"
+            ? "គ្រប់គ្រងគណនី និងមើលព័ត៌មានរបស់អ្នក"
+            : "Manage your account and view your information."}
+        </p>
+
         <GlassCard className="mt-6">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gold/20">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gold/20">
               <User className="h-8 w-8 text-gold" />
             </div>
 
-            <div className="flex-1">
-              <h2 className="text-xl font-bold">
+            <div className="min-w-0 flex-1">
+              <h2
+                className={`truncate text-xl font-bold ${
+                  language === "km"
+                    ? "font-khmer leading-9"
+                    : ""
+                }`}
+              >
                 {displayName}
               </h2>
 
               {customer?.username && (
-                <p className="text-sm text-gray-500">
+                <p className="truncate text-sm text-gray-500">
                   @{customer.username}
                 </p>
               )}
 
-              <p className="mt-2 font-semibold text-gold">
+              <p
+                className={`mt-2 font-semibold text-gold ${
+                  language === "km"
+                    ? "font-khmer leading-7"
+                    : ""
+                }`}
+              >
                 {customer?.love_points ?? 0} Love Points
-              </p>
-
-              {/* Debug */}
-              <p className="mt-2 text-xs text-gray-400">
-                Debug: {customer ? customer.telegram_user_id : "No customer detected"}
               </p>
             </div>
           </div>
         </GlassCard>
 
-        {/* Wishlist */}
         <Link href="/wishlist">
           <GlassCard className="mt-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Heart className="h-6 w-6 text-red-500" />
-                <span className="font-semibold">My Wishlist</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Heart className="h-6 w-6 shrink-0 text-red-500" />
+
+                <span className={menuTextClass}>
+                  {language === "km"
+                    ? "បញ្ជីចំណូលចិត្ត"
+                    : "My Wishlist"}
+                </span>
               </div>
 
-              <ChevronRight className="h-5 w-5 text-gray-400" />
+              <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />
             </div>
           </GlassCard>
         </Link>
 
-        {/* Orders */}
         <Link href="/orders">
           <GlassCard className="mt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Package className="h-6 w-6 text-gold" />
-                <span className="font-semibold">My Orders</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Package className="h-6 w-6 shrink-0 text-gold" />
+
+                <span className={menuTextClass}>
+                  {language === "km"
+                    ? "ការបញ្ជាទិញរបស់ខ្ញុំ"
+                    : "My Orders"}
+                </span>
               </div>
 
-              <ChevronRight className="h-5 w-5 text-gray-400" />
+              <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />
             </div>
           </GlassCard>
         </Link>
 
-        {/* Track Order */}
         <Link href="/track-order">
           <GlassCard className="mt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Truck className="h-6 w-6 text-gold" />
-                <span className="font-semibold">Track Order</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Truck className="h-6 w-6 shrink-0 text-gold" />
+
+                <span className={menuTextClass}>
+                  {language === "km"
+                    ? "តាមដានការបញ្ជាទិញ"
+                    : "Track Order"}
+                </span>
               </div>
 
-              <ChevronRight className="h-5 w-5 text-gray-400" />
+              <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />
             </div>
           </GlassCard>
         </Link>
 
-        {/* Gifts */}
         <Link href="/gifts">
           <GlassCard className="mt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Gift className="h-6 w-6 text-gold" />
-                <span className="font-semibold">Thank You Gifts</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Gift className="h-6 w-6 shrink-0 text-gold" />
+
+                <span className={menuTextClass}>
+                  {language === "km"
+                    ? "អំណោយថ្លែងអំណរគុណ"
+                    : "Thank You Gifts"}
+                </span>
               </div>
 
-              <ChevronRight className="h-5 w-5 text-gray-400" />
+              <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />
             </div>
           </GlassCard>
         </Link>
