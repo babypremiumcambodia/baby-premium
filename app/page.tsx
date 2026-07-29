@@ -1,7 +1,7 @@
 import HomeHeader from "@/components/home/HomeHeader";
 import HeroBanner from "@/components/home/HeroBanner";
 import SearchBar from "@/components/home/SearchBar";
-import LovePointsCard from "@/components/home/LovePointsCard";
+import BannerSlider from "@/components/home/BannerSlider";
 import CategoryGrid from "@/components/home/CategoryGrid";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
@@ -22,7 +22,7 @@ export default async function Home() {
 
         <SearchBar />
 
-        <LovePointsCard />
+        <BannerSlider />
 
         <CategoryGrid />
 

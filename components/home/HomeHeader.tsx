@@ -22,9 +22,6 @@ export default function HomeHeader() {
         </p>
       </div>
 
-      <div className="glass flex h-14 w-14 items-center justify-center rounded-full">
-        <Crown className="h-7 w-7 text-yellow-500" />
-      </div>
     </header>
   );
 }

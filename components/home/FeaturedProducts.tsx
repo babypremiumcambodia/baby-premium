@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import ProductCard from "@/components/products/ProductCard";
+import { useLanguage } from "@/components/language/LanguageProvider";
 
 type Product = {
   id: number;
@@ -16,6 +19,7 @@ type FeaturedProductsProps = {
 export default function FeaturedProducts({
   products,
 }: FeaturedProductsProps) {
+  const { language } = useLanguage();
   const featuredProducts = products.slice(0, 4);
 
   if (featuredProducts.length === 0) {
@@ -25,21 +29,41 @@ export default function FeaturedProducts({
   return (
     <section className="mt-8">
       <div className="mb-4 flex items-end justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">
-            Featured Products
+        <div className="min-w-0">
+          <h2
+            className={`font-bold text-slate-900 ${
+              language === "km"
+                ? "font-khmer text-xl leading-9"
+                : "text-xl"
+            }`}
+          >
+            {language === "km"
+              ? "ផលិតផលពិសេស"
+              : "Featured Products"}
           </h2>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Popular picks from Baby Premium+
+          <p
+            className={`mt-1 text-sm text-gray-500 ${
+              language === "km"
+                ? "font-khmer leading-7"
+                : "leading-6"
+            }`}
+          >
+            {language === "km"
+              ? "ពេញនិយមប្រើប្រាស់ Baby Premium+"
+              : "Popular picks from Baby Premium+"}
           </p>
         </div>
 
         <Link
           href="/shop"
-          className="flex-shrink-0 text-sm font-semibold text-gold"
+          className={`shrink-0 text-sm font-semibold text-gold ${
+            language === "km"
+              ? "font-khmer leading-7"
+              : ""
+          }`}
         >
-          View All
+          {language === "km" ? "មើលទាំងអស់" : "View All"}
         </Link>
       </div>
 

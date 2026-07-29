@@ -1,28 +1,74 @@
+"use client";
+
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useLanguage } from "@/components/language/LanguageProvider";
 
 export default function HeroBanner() {
+  const { language } = useLanguage();
+
   return (
     <section className="glass mt-6 overflow-hidden rounded-[36px] p-6">
       <p className="text-xs font-semibold tracking-[0.28em] text-gold">
         BABY PREMIUM+
       </p>
 
-      <h2 className="mt-3 text-3xl font-bold leading-tight">
-        Everyday Baby
-        <br />
-        Essentials
+      <h2
+        className={`mt-3 font-bold ${
+          language === "km"
+            ? "font-khmer text-2xl leading-[1.7]"
+            : "text-3xl leading-tight"
+        }`}
+      >
+        {language === "km" ? (
+          <>
+            តម្រូវការប្រចាំថ្ងៃ
+            <br />
+            សម្រាប់កូនលោកអ្នក
+          </>
+        ) : (
+          <>
+            Everyday Baby
+            <br />
+            Essentials
+          </>
+        )}
       </h2>
 
-      <p className="mt-3 text-sm leading-6 text-gray-500">
-        Trusted brands from Australia,
-        <br />
-        New Zealand, USA & Europe.
+      <p
+        className={`mt-3 text-gray-500 ${
+          language === "km"
+            ? "font-khmer text-sm leading-7"
+            : "text-sm leading-6"
+        }`}
+      >
+        {language === "km" ? (
+          <>
+            គុណភាពល្អមកពីរប្រទេសអូស្រ្ដាលី នូវែលសេឡង់ សហរដ្ឋអាមេរិក
+            <br />
+            និងអឺរ៉ុប
+          </>
+        ) : (
+          <>
+            Trusted brands from Australia, New Zealand, USA
+            <br />
+            &amp; Europe
+          </>
+        )}
       </p>
 
-      <button className="mt-6 flex items-center gap-2 rounded-full bg-gold px-5 py-3 font-semibold text-white transition hover:opacity-90">
-        Shop Now
+      <Link
+        href="/shop"
+        className={`mt-6 inline-flex items-center gap-2 rounded-full bg-gold px-5 py-3 font-semibold text-white transition hover:opacity-90 active:scale-95 ${
+          language === "km"
+            ? "font-khmer leading-7"
+            : ""
+        }`}
+      >
+        {language === "km" ? "មើលទំនិញ" : "Shop Now"}
+
         <ArrowRight size={18} />
-      </button>
+      </Link>
     </section>
   );
 }

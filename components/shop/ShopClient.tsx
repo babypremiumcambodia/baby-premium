@@ -28,8 +28,12 @@ export default function ShopClient({
   const searchParams = useSearchParams();
   const selectedBrand = searchParams.get("brand") ?? "";
 
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [search, setSearch] = useState(
+  searchParams.get("search") ?? ""
+);
+  const [selectedCategory, setSelectedCategory] = useState(
+  searchParams.get("category") ?? "All"
+);
 
   const filteredProducts = products.filter((product) => {
     const productBrand = product.brand ?? "";

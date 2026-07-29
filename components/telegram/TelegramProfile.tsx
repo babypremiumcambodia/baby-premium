@@ -1,38 +1,52 @@
 "use client";
 
 import { useTelegramUser } from "@/hooks/useTelegramUser";
+import { useLanguage } from "@/components/language/LanguageProvider";
 
 export default function TelegramProfile() {
   const user = useTelegramUser();
+  const { language } = useLanguage();
 
   if (!user) return null;
 
+  const customerName =
+    user.first_name ??
+    (language === "km" ? "អតិថិជន" : "Customer");
+
   return (
-    <div className="mb-6 flex min-h-[90px] items-center gap-4 rounded-3xl bg-white/80 px-5 py-4 shadow">
+    <div className="glass mb-4 mt-3 inline-flex max-w-full items-center gap-3 rounded-full px-3 py-2">
       {user.photo_url ? (
         <img
           src={user.photo_url}
-          alt={user.first_name ?? "Telegram user"}
-          className="h-12 w-12 rounded-full object-cover"
+          alt={customerName}
+          className="h-10 w-10 shrink-0 rounded-full border border-white/70 object-cover"
         />
       ) : (
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold text-xl font-bold text-white">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-bold text-white">
           {(user.first_name?.charAt(0) ?? "U").toUpperCase()}
         </div>
       )}
 
-      <div className="min-w-0">
-        <p className="text-sm text-gray-500">Hello,</p>
+      <div className="min-w-0 pr-3">
+        <p
+          className={`text-xs text-gray-500 ${
+            language === "km"
+              ? "font-khmer leading-5"
+              : ""
+          }`}
+        >
+          {language === "km" ? "សួស្តី" : "Hello"}
+        </p>
 
-        <h2 className="truncate text-2xl font-bold leading-tight text-slate-900">
-          {user.first_name ?? "Customer"} 
-        </h2>
-
-        {user.username && (
-          <p className="mt-0.5 truncate text-xs text-gray-500">
-            @{user.username}
-          </p>
-        )}
+        <p
+          className={`max-w-[180px] truncate font-semibold text-slate-900 ${
+            language === "km"
+              ? "font-khmer text-sm leading-6"
+              : "text-sm"
+          }`}
+        >
+          {customerName}
+        </p>
       </div>
     </div>
   );

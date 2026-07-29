@@ -1,59 +1,113 @@
+"use client";
+
+import Link from "next/link";
+import {
+  Baby,
+  Layers,
+  Heart,
+  Wheat,
+  GlassWater,
+  Gift,
+} from "lucide-react";
+import { useLanguage } from "@/components/language/LanguageProvider";
+
 const categories = [
   {
-    name: "Baby Formula",
-    icon: "🍼",
+    value: "Formula",
+    label: {
+      en: "Baby Formula",
+      km: "ម្សៅទឹកដោះគោ",
+    },
+    icon: Baby,
   },
   {
-    name: "Diapers",
-    icon: "👶",
+    value: "Diapers",
+    label: {
+      en: "Diapers",
+      km: "ខោទឹកនោម",
+    },
+    icon: Layers,
   },
   {
-    name: "Baby Care",
-    icon: "🧴",
+    value: "Essentials",
+    label: {
+      en: "Baby Care",
+      km: "សម្ភារៈទូទៅ",
+    },
+    icon: Heart,
   },
   {
-    name: "Nutrition",
-    icon: "🥛",
+    value: "Food & Nutrition",
+    label: {
+      en: "Nutrition",
+      km: "អាហារូបត្ថម្ភ",
+    },
+    icon: Wheat,
   },
   {
-    name: "Feeding",
-    icon: "🍼",
+    value: "Milk",
+    label: {
+      en: "Milk",
+      km: "ទឹកដោះគោ",
+    },
+    icon: GlassWater,
   },
   {
-    name: "Promotions",
-    icon: "🎁",
+    value: "All",
+    label: {
+      en: "Promotions",
+      km: "ប្រូម៉ូសិន",
+    },
+    icon: Gift,
   },
 ];
 
 export default function CategoryGrid() {
+  const { language } = useLanguage();
+
   return (
     <>
-      <h2 className="mt-8 mb-4 text-2xl font-bold">
-        Shop Categories
+      <h2
+        className={`mb-4 mt-8 font-bold ${
+          language === "km"
+            ? "font-khmer text-xl leading-9"
+            : "text-2xl"
+        }`}
+      >
+        {language === "km"
+          ? "ប្រភេទទំនិញ"
+          : "Shop Categories"}
       </h2>
 
       <div className="grid grid-cols-2 gap-4">
-        {categories.map((item) => (
-          <button
-            key={item.name}
-            className="
-              glass
-              rounded-[28px]
-              p-5
-              text-left
-              transition-all
-              hover:scale-[1.03]
-            "
-          >
-            <div className="text-3xl">
-              {item.icon}
-            </div>
+        {categories.map((item) => {
+          const Icon = item.icon;
 
-            <p className="mt-4 font-semibold">
-              {item.name}
-            </p>
-          </button>
-        ))}
+          return (
+            <Link
+              key={item.value}
+              href={`/shop?category=${encodeURIComponent(
+                item.value
+              )}`}
+              className="group glass rounded-[28px] p-5 text-left transition-all hover:scale-[1.03] active:scale-[0.98]"
+            >
+              <Icon
+               className="h-8 w-8 text-gold"
+               strokeWidth={1.8}
+              />
+
+              <p
+                className={`mt-4 font-semibold ${
+                  language === "km"
+                    ? "font-khmer leading-7"
+                    : ""
+                }`}
+              >
+                {item.label[language]}
+              </p>
+            </Link>
+          );
+        })}
       </div>
     </>
   );
