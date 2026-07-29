@@ -54,7 +54,7 @@ export default function ProductCard({
       href={`/product/${id}`}
       className="block self-start"
     >
-      <GlassCard className="rounded-[24px] border border-white/60 !bg-white/10 p-2.5 shadow-[0_12px_35px_rgba(122,79,22,0.08)] backdrop-blur-[30px]">
+      <GlassCard className="rounded-[24px] border border-white/60 !bg-white/30 p-2.5 shadow-[0_12px_35px_rgba(122,79,22,0.08)] backdrop-blur-[30px]">
         <div className="relative">
   <Image
     src={image}
