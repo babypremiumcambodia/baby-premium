@@ -186,7 +186,7 @@ const response = await fetch("/api/rewards/redeem", {
             }`}
           >
             {language === "km"
-              ? "កាដូរប្ដូរសម្រាប់អរគុណ"
+              ? "កាដូរសម្រាប់ការសន្សំពិន្ទុ"
               : "Thank You Gifts"}
           </h1>
 
@@ -390,7 +390,7 @@ const response = await fetch("/api/rewards/redeem", {
               className={`mt-2 text-gray-500 ${khmerText}`}
             >
               {language === "km"
-                ? "កាដូរប្ដូរសម្រាប់ការអរគុណត្រូវបានរួចរាល់"
+                ? "សូមអរគុណកាដូរប្ដូរត្រូវបានរួចរាល់"
                 : "Your thank you gift has been redeemed."}
             </p>
 

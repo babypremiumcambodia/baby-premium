@@ -31,8 +31,8 @@ export default function ProfilePage() {
           ? "សមាជិក Baby Premium+"
           : "Baby Premium+ Member")
       : language === "km"
-        ? "អ្នកប្រើប្រាស់"
-        : "Guest User";
+        ? "សមាជិក ឬ អតិថិជនថ្មី"
+        : "Membership/ Guest User";
 
   const menuTextClass =
     language === "km"
@@ -164,7 +164,7 @@ export default function ProfilePage() {
 
                 <span className={menuTextClass}>
                   {language === "km"
-                    ? "អំណោយថ្លែងអំណរគុណ"
+                    ? "កាដូរសម្រាប់ការសន្សំពិន្ទុ"
                     : "Thank You Gifts"}
                 </span>
               </div>

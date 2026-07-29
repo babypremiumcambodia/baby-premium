@@ -237,7 +237,9 @@ export default function CheckoutPage() {
     if (form.payment_method === "KHQR") {
       router.push(`/payment/khqr?order=${order.id}`);
     } else {
-      router.push("/order-success");
+      router.push(
+  `/order-success?order=${encodeURIComponent(orderNumber)}`
+);
     }
   }
 
@@ -355,7 +357,7 @@ export default function CheckoutPage() {
           >
             📍{" "}
             {language === "km"
-              ? "ចែករំលែកទីតាំងរបស់ខ្ញុំ"
+              ? "ដាក់ទីតាំងរបស់ខ្ញុំ"
               : "Share My Location"}
           </button>
 

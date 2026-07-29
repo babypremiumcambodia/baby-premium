@@ -40,7 +40,7 @@ export default function OrdersPage() {
         if (!initData) {
           setErrorMessage(
             language === "km"
-              ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram ដើម្បីមើលការបញ្ជាទិញរបស់អ្នក។"
+              ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram ដើម្បីមើលការបញ្ជាទិញរបស់អ្នក"
               : "Open this app inside Telegram to view your orders."
           );
 
@@ -63,7 +63,7 @@ export default function OrdersPage() {
         if (!response.ok) {
           setErrorMessage(
             language === "km"
-              ? "មិនអាចផ្ទុកការបញ្ជាទិញបានទេ។"
+              ? "មិនអាចផ្ទុកការបញ្ជាទិញបានទេ"
               : result.error ?? "Failed to load orders."
           );
 
@@ -77,7 +77,7 @@ export default function OrdersPage() {
 
         setErrorMessage(
           language === "km"
-            ? "មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្តងទៀត។"
+            ? "មានបញ្ហាកើតឡើង សូមព្យាយាមម្តងទៀត"
             : "Something went wrong. Please try again."
         );
       } finally {
@@ -124,7 +124,7 @@ export default function OrdersPage() {
           }`}
         >
           {language === "km"
-            ? "មើលការបញ្ជាទិញថ្មីៗ និងស្ថានភាពដឹកជញ្ជូន។"
+            ? "មើលការបញ្ជាទិញថ្មីៗ និងស្ថានភាពដឹកជញ្ជូន"
             : "View your recent purchases and delivery status."}
         </p>
 
@@ -168,7 +168,7 @@ export default function OrdersPage() {
               className={`mt-2 text-sm text-gray-500 ${khmerText}`}
             >
               {language === "km"
-                ? "ការបញ្ជាទិញរបស់អ្នកនឹងបង្ហាញនៅទីនេះ។"
+                ? "ការបញ្ជាទិញរបស់អ្នកនឹងបង្ហាញនៅទីនេះ"
                 : "Your orders will appear here."}
             </p>
           </GlassCard>
