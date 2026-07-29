@@ -54,50 +54,63 @@ export default function ProductCard({
       href={`/product/${id}`}
       className="block self-start"
     >
-      <GlassCard className="rounded-[20px] p-2.5">
-        <Image
-          src={image}
-          alt={name}
-          width={140}
-          height={140}
-          className="mx-auto h-24 w-full object-contain"
-        />
+      <GlassCard className="rounded-[24px] border border-white/60 !bg-white/10 p-2.5 shadow-[0_12px_35px_rgba(122,79,22,0.08)] backdrop-blur-[30px]">
+        <div className="relative">
+  <Image
+    src={image}
+    alt={name}
+    width={140}
+    height={140}
+    className="mx-auto h-24 w-full object-contain"
+  />
 
+  <span
+    className={`absolute -right-2.5 -top-1 rounded-full border border-[#d8c49a]/55 bg-white/15 px-2 py-1 text-[8px] font-semibold text-[#a48754] shadow-sm backdrop-blur-xl ${
+  language === "km"
+    ? "font-khmer leading-4"
+    : ""
+}`}
+  >
+    {language === "km" ? "ព័ត៌មាន" : "Details"}
+  </span>
+</div>
+
+        
         {brand && (
-          <p className="mt-1 truncate text-[8px] font-semibold uppercase tracking-[0.08em] text-gray-400">
+          <p className="-ml-2 mt-1 truncate text-[8px] font-semibold uppercase tracking-[0.08em] text-gray-400">
             {brand}
           </p>
         )}
 
-        <h3 className="mt-1 line-clamp-2 min-h-[32px] text-[12px] font-semibold leading-4 text-slate-900">
+        <h3 className="-ml-2 mt-1 line-clamp-2 min-h-[32px] text-[12px] font-semibold leading-4 text-slate-900">
           {name}
         </h3>
-
-        <p className="mt-0.5 text-base font-bold leading-5 text-gold">
+        <div className="mt-0.5 flex items-center justify-between gap-2">
+        <p className="-ml-2 mt-0.5 text-base font-bold leading-5 text-gold">
           ${Number(price).toFixed(2)}
         </p>
 
-        <div className="mt-1">
+        
           {outOfStock ? (
             <span
-              className={`inline-flex rounded-full bg-red-50 px-2 py-0.5 text-[8px] font-semibold text-red-600 ${khmerText}`}
-            >
+              className={`relative -right-2.5 inline-flex rounded-full border border-red-200/60 bg-white/15 px-2 py-0.5 text-[8px] font-semibold text-red-500/80 shadow-sm backdrop-blur-xl ${khmerText}`}
+              >
               {language === "km"
                 ? "អស់ពីស្តុក"
                 : "Out of Stock"}
             </span>
           ) : stock <= 5 ? (
             <span
-              className={`inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-[8px] font-semibold text-orange-600 ${khmerText}`}
-            >
+              className={`relative -right-2.5 inline-flex rounded-full border border-orange-200/60 bg-white/15 px-2 py-0.5 text-[8px] font-semibold text-orange-500/80 shadow-sm backdrop-blur-xl ${khmerText}`}
+              >
               {language === "km"
                 ? "នៅសល់តិច"
                 : "Few Left"}
             </span>
           ) : (
             <span
-              className={`inline-flex rounded-full bg-green-50 px-2 py-0.5 text-[8px] font-semibold text-green-700 ${khmerText}`}
-            >
+              className={`relative -right-2.5 inline-flex rounded-full border border-emerald-200/60 bg-white/15 px-2 py-0.5 text-[8px] font-semibold text-emerald-600/80 shadow-sm backdrop-blur-xl ${khmerText}`}
+              >
               {language === "km"
                 ? "មានស្តុក"
                 : "In Stock"}
@@ -105,7 +118,7 @@ export default function ProductCard({
           )}
         </div>
 
-        <div className="flex gap-1 pt-2">
+        <div className="mt-2 flex items-center gap-0">
           <button
             type="button"
             disabled={outOfStock}
@@ -129,13 +142,13 @@ export default function ProductCard({
                 );
               }
             }}
-            className={`flex h-9 min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-1.5 text-[9px] font-semibold text-white transition ${
+            className={`relative -left-2 flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-[10px] font-semibold text-white transition ${
               outOfStock
                 ? "cursor-not-allowed bg-gray-400"
                 : "bg-gold hover:opacity-90 active:scale-[0.98]"
             } ${khmerText}`}
           >
-            <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+            <ShoppingCart className="h-5 w-5 shrink-0" />
 
             <span className="truncate">
               {outOfStock
@@ -149,27 +162,36 @@ export default function ProductCard({
           </button>
 
           <button
-            type="button"
-            aria-label={
-              language === "km"
-                ? "បន្ថែម ឬដកចេញពីចំណូលចិត្ត"
-                : "Toggle favorite"
-            }
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              toggleItem(id);
-            }}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/80 shadow-sm transition active:scale-95"
-          >
-            <Heart
-              className={`h-4 w-4 ${
-                favoriteActive
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-400"
-              }`}
-            />
-          </button>
+  type="button"
+  aria-label={
+    favoriteActive
+      ? language === "km"
+        ? "ដកចេញពីចំណូលចិត្ត"
+        : "Remove from wishlist"
+      : language === "km"
+        ? "បន្ថែមទៅចំណូលចិត្ត"
+        : "Add to wishlist"
+  }
+  onClick={(event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleItem(id);
+  }}
+  className={`relative -right-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border backdrop-blur-2xl transition-all duration-200 active:scale-90 ${
+    favoriteActive
+      ? "border-red-200/70 bg-red-50/40 shadow-[0_5px_16px_rgba(239,68,68,0.16)]"
+      : "border-white/70 bg-white/20 shadow-[0_5px_16px_rgba(23,36,59,0.08)]"
+  }`}
+>
+  <Heart
+    className={`h-[18px] w-[18px] transition-all duration-200 ${
+      favoriteActive
+        ? "scale-110 fill-red-500 text-red-500"
+        : "text-slate-400"
+    }`}
+    strokeWidth={2}
+  />
+</button>
         </div>
       </GlassCard>
     </Link>

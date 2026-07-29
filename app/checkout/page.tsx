@@ -68,8 +68,8 @@ export default function CheckoutPage() {
         ...previous,
         location_status:
           language === "km"
-            ? "ឧបករណ៍នេះមិនគាំទ្រការចែករំលែកទីតាំងទេ។"
-            : "Location is not supported on this device.",
+            ? "ឧបករណ៍នេះមិនគាំទ្រការចែករំលែកទីតាំងទេ"
+            : "Location is not supported on this device",
       }));
       return;
     }
@@ -82,8 +82,8 @@ export default function CheckoutPage() {
           longitude: position.coords.longitude,
           location_status:
             language === "km"
-              ? "✅ បានចែករំលែកទីតាំងដោយជោគជ័យ"
-              : "✅ Location shared successfully",
+              ? "បានចែករំលែកទីតាំងដោយជោគជ័យ"
+              : "Location shared successfully",
         }));
       },
       () => {
@@ -91,8 +91,8 @@ export default function CheckoutPage() {
           ...previous,
           location_status:
             language === "km"
-              ? "⚠️ មិនអាចទទួលទីតាំងបានទេ។ អ្នកនៅតែអាចបញ្ជាទិញបាន។"
-              : "⚠️ Could not get location. You can still place the order.",
+              ? "មិនអាចទទួលទីតាំងបានទេ អ្នកនៅតែអាចបញ្ជាទិញបាន"
+              : "Could not get location. You can still place the order",
         }));
       }
     );
@@ -102,8 +102,8 @@ export default function CheckoutPage() {
     if (items.length === 0) {
       alert(
         language === "km"
-          ? "កន្ត្រករបស់អ្នកទទេ។"
-          : "Your cart is empty."
+          ? "កន្ត្រករបស់អ្នកទទេ"
+          : "Your cart is empty"
       );
       return;
     }
@@ -111,8 +111,8 @@ export default function CheckoutPage() {
     if (!customer) {
       alert(
         language === "km"
-          ? "សូមបើកកម្មវិធីនេះក្នុង Telegram ដើម្បីទទួលបាន Love Points។"
-          : "Please open this app inside Telegram to earn Love Points."
+          ? "សូមបើកកម្មវិធីនេះក្នុង Telegram ដើម្បីទទួលបាន Love Points"
+          : "Please open this app inside Telegram to earn Love Points"
       );
       return;
     }

@@ -42,7 +42,7 @@ export default function CartPage() {
           }`}
         >
           {language === "km"
-            ? "ពិនិត្យផលិតផលដែលអ្នកបានជ្រើសរើស មុនពេលបញ្ជាទិញ។"
+            ? "ពិនិត្យផលិតផលដែលអ្នកបានជ្រើសរើស មុនពេលបញ្ជាទិញ"
             : "Review your selected products before checkout."}
         </p>
 

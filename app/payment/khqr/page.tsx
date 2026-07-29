@@ -46,7 +46,7 @@ function KHQRContent() {
       if (!orderId) {
         setErrorMessage(
           language === "km"
-            ? "មិនមានលេខបញ្ជាទិញ។"
+            ? "មិនមានលេខបញ្ជាទិញ"
             : "Order number is missing."
         );
 
@@ -59,7 +59,7 @@ function KHQRContent() {
       if (!initData) {
         setErrorMessage(
           language === "km"
-            ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram ដើម្បីបង់ប្រាក់។"
+            ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram ដើម្បីបង់ប្រាក់"
             : "Open this app inside Telegram to make payment."
         );
 
@@ -83,7 +83,7 @@ function KHQRContent() {
         if (!response.ok) {
           setErrorMessage(
             language === "km"
-              ? "មិនអាចផ្ទុកការបញ្ជាទិញបានទេ។"
+              ? "មិនអាចផ្ទុកការបញ្ជាទិញបានទេ"
               : result.error ?? "Failed to load order."
           );
 
@@ -100,7 +100,7 @@ function KHQRContent() {
         if (!matchedOrder) {
           setErrorMessage(
             language === "km"
-              ? "រកមិនឃើញការបញ្ជាទិញនេះក្នុងគណនីរបស់អ្នក។"
+              ? "រកមិនឃើញការបញ្ជាទិញនេះក្នុងគណនីរបស់អ្នក"
               : "This order was not found in your account."
           );
 
@@ -113,7 +113,7 @@ function KHQRContent() {
 
         setErrorMessage(
           language === "km"
-            ? "មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្តងទៀត។"
+            ? "មានបញ្ហាកើតឡើង សូមព្យាយាមម្តងទៀត"
             : "Something went wrong. Please try again."
         );
       } finally {
@@ -132,7 +132,7 @@ function KHQRContent() {
     if (!initData) {
       alert(
         language === "km"
-          ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram។"
+          ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram"
           : "Please open this app inside Telegram."
       );
 
@@ -161,7 +161,7 @@ function KHQRContent() {
       if (!response.ok) {
         alert(
           language === "km"
-            ? "មិនអាចបញ្ជូនព័ត៌មានការបង់ប្រាក់បានទេ។"
+            ? "មិនអាចបញ្ជូនព័ត៌មានការបង់ប្រាក់បានទេ"
             : result.error ??
                 "Failed to submit payment."
         );
@@ -192,7 +192,7 @@ function KHQRContent() {
 
       alert(
         language === "km"
-          ? "មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្តងទៀត។"
+          ? "មានបញ្ហាកើតឡើង សូមព្យាយាមម្តងទៀត"
           : "Something went wrong. Please try again."
       );
     } finally {
@@ -237,7 +237,7 @@ function KHQRContent() {
             }`}
           >
             {language === "km"
-              ? "ស្កេនកូដ QR ខាងក្រោម ដើម្បីបង់ប្រាក់។"
+              ? "ស្កេនកូដ QR ខាងក្រោម ដើម្បីបង់ប្រាក់"
               : "Scan the QR code below to complete payment."}
           </p>
         </div>
@@ -296,7 +296,7 @@ function KHQRContent() {
                 className={`text-center text-sm text-gray-500 ${khmerText}`}
               >
                 {language === "km"
-                  ? "បន្ទាប់ពីបង់ប្រាក់រួច សូមចុចប៊ូតុងខាងក្រោម។"
+                  ? "បន្ទាប់ពីបង់ប្រាក់រួច សូមចុចប៊ូតុងខាងក្រោម"
                   : "After completing payment, tap the button below."}
               </p>
             </div>
