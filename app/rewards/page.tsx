@@ -186,7 +186,7 @@ const response = await fetch("/api/rewards/redeem", {
             }`}
           >
             {language === "km"
-              ? "កាដូរសម្រាប់ការសន្សំពិន្ទុ"
+              ? "កាដូរសម្រាប់ប្ដូរ"
               : "Thank You Gifts"}
           </h1>
 

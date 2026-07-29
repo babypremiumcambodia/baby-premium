@@ -156,7 +156,7 @@ export default function ProfilePage() {
           </GlassCard>
         </Link>
 
-        <Link href="/gifts">
+        <Link href="/rewards">
           <GlassCard className="mt-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">

@@ -1,6 +1,10 @@
-import { ReactNode } from "react";
+import type {
+  HTMLAttributes,
+  ReactNode,
+} from "react";
 
-interface GlassCardProps {
+interface GlassCardProps
+  extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   className?: string;
 }
@@ -8,18 +12,12 @@ interface GlassCardProps {
 export default function GlassCard({
   children,
   className = "",
+  ...props
 }: GlassCardProps) {
   return (
     <div
-      className={`
-        glass
-        rounded-[32px]
-        p-6
-        shadow-xl
-        transition-all
-        duration-300
-        ${className}
-      `}
+      {...props}
+      className={`glass relative rounded-[32px] p-6 shadow-xl touch-manipulation ${className}`}
     >
       {children}
     </div>
