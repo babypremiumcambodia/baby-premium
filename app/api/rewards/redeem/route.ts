@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase-server";
+import { verifyTelegramInitData } from "@/lib/telegram-auth";
 
 export const runtime = "nodejs";
 
@@ -7,13 +8,28 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const customerId = Number(body.customerId);
+    const initData = String(body.initData ?? "");
     const rewardId = Number(body.rewardId);
 
-    if (!customerId || !rewardId) {
+    const telegramUser =
+      verifyTelegramInitData(initData);
+
+    if (!telegramUser) {
       return NextResponse.json(
         {
-          error: "Missing customer or reward information.",
+          error:
+            "Telegram authentication is missing or invalid.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    if (!rewardId) {
+      return NextResponse.json(
+        {
+          error: "Missing reward information.",
         },
         {
           status: 400,
@@ -21,19 +37,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: customer, error: customerError } = await supabaseServer
-      .from("customers")
-      .select("id, love_points")
-      .eq("id", customerId)
-      .single();
+    const { data: customer, error: customerError } =
+      await supabaseServer
+        .from("customers")
+        .select("id, love_points")
+        .eq(
+          "telegram_user_id",
+          String(telegramUser.id)
+        )
+        .single();
 
     if (customerError || !customer) {
-      console.error("Customer lookup error:", customerError);
+      console.error(
+        "Customer lookup error:",
+        customerError
+      );
 
       return NextResponse.json(
         {
           error: "Customer not found.",
-          details: customerError,
         },
         {
           status: 404,
@@ -41,11 +63,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: reward, error: rewardError } = await supabaseServer
-      .from("rewards")
-      .select("id, name, image, points_required")
-      .eq("id", rewardId)
-      .single();
+    const { data: reward, error: rewardError } =
+      await supabaseServer
+        .from("rewards")
+        .select(
+          "id, name, image, points_required"
+        )
+        .eq("id", rewardId)
+        .single();
 
     if (rewardError || !reward) {
       console.error("Reward lookup error:", rewardError);
@@ -53,7 +78,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: "Reward not found.",
-          details: rewardError,
         },
         {
           status: 404,
@@ -61,13 +85,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const currentPoints = Number(customer.love_points ?? 0);
-    const requiredPoints = Number(reward.points_required ?? 0);
+    const currentPoints = Number(
+      customer.love_points ?? 0
+    );
+
+    const requiredPoints = Number(
+      reward.points_required ?? 0
+    );
 
     if (currentPoints < requiredPoints) {
       return NextResponse.json(
         {
-          error: "You do not have enough Love Points.",
+          error:
+            "You do not have enough Love Points.",
         },
         {
           status: 400,
@@ -75,13 +105,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const remainingPoints = currentPoints - requiredPoints;
-
-    console.log("Creating reward redemption:", {
-      customerId: customer.id,
-      rewardId: reward.id,
-      pointsSpent: requiredPoints,
-    });
+    const remainingPoints =
+      currentPoints - requiredPoints;
 
     const { data: redemption, error: redemptionError } =
       await supabaseServer
@@ -97,15 +122,17 @@ export async function POST(request: Request) {
         .select("id")
         .single();
 
-    if (redemptionError) {
-      console.error("========== REDEMPTION INSERT ERROR ==========");
-      console.error(redemptionError);
-      console.error("=============================================");
+    if (redemptionError || !redemption) {
+      console.error(
+        "Reward redemption error:",
+        redemptionError
+      );
 
       return NextResponse.json(
         {
-          error: redemptionError.message,
-          details: redemptionError,
+          error:
+            redemptionError?.message ??
+            "Reward redemption was not created.",
         },
         {
           status: 500,
@@ -113,26 +140,19 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!redemption) {
-      return NextResponse.json(
-        {
-          error: "Reward redemption was not created.",
-        },
-        {
-          status: 500,
-        }
-      );
-    }
-
-    const { error: pointsError } = await supabaseServer
-      .from("customers")
-      .update({
-        love_points: remainingPoints,
-      })
-      .eq("id", customer.id);
+    const { error: pointsError } =
+      await supabaseServer
+        .from("customers")
+        .update({
+          love_points: remainingPoints,
+        })
+        .eq("id", customer.id);
 
     if (pointsError) {
-      console.error("Love Points update error:", pointsError);
+      console.error(
+        "Love Points update error:",
+        pointsError
+      );
 
       await supabaseServer
         .from("reward_redemptions")
@@ -142,7 +162,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: pointsError.message,
-          details: pointsError,
         },
         {
           status: 500,
@@ -162,7 +181,10 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Reward redemption API error:", error);
+    console.error(
+      "Reward redemption API error:",
+      error
+    );
 
     return NextResponse.json(
       {

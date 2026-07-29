@@ -17,8 +17,8 @@ export default function SearchBar({
   return (
     <div className="group relative w-full">
       <Search
-        size={20}
-        className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-[#b88932]"
+        className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gold"
+        strokeWidth={2}
       />
 
       <input
@@ -31,22 +31,15 @@ export default function SearchBar({
             : "Search products or brands..."
         }
         aria-label={
-          language === "km" ? "ស្វែងរកផលិតផល" : "Search products"
+          language === "km"
+            ? "ស្វែងរកផលិតផល"
+            : "Search products"
         }
-        className="
-          w-full rounded-[24px]
-          border border-white/70
-          bg-white/45
-          py-4 pl-14 pr-14
-          text-[15px] text-[#17243b]
-          shadow-[0_12px_35px_rgba(122,79,22,0.12)]
-          outline-none backdrop-blur-2xl
-          placeholder:text-[#7a4f16]/45
-          transition-all duration-300
-          focus:border-[#b88932]/50
-          focus:bg-white/65
-          focus:shadow-[0_14px_40px_rgba(184,137,50,0.20)]
-        "
+        className={`w-full rounded-[20px] border border-white/60 bg-white/35 py-3 pl-11 pr-11 text-sm text-[#17243b] shadow-[0_8px_24px_rgba(122,79,22,0.09)] outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-[#7a4f16]/40 focus:border-gold/40 focus:bg-white/55 ${
+          language === "km"
+            ? "font-khmer leading-6"
+            : ""
+        }`}
       />
 
       {value && (
@@ -58,9 +51,9 @@ export default function SearchBar({
               ? "សម្អាតការស្វែងរក"
               : "Clear search"
           }
-          className="absolute right-5 top-1/2 -translate-y-1/2 text-[#7a4f16]/50 transition hover:text-[#b88932]"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7a4f16]/45 transition hover:text-gold"
         >
-          <X size={19} />
+          <X className="h-[18px] w-[18px]" />
         </button>
       )}
     </div>

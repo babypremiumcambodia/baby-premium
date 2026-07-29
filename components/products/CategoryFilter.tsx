@@ -14,11 +14,17 @@ const categories = [
   },
   {
     value: "Formula",
-    label: { en: "Formula", km: "ម្សៅទឹកដោះគោ" },
+    label: {
+      en: "Formula",
+      km: "ម្សៅទឹកដោះគោ",
+    },
   },
   {
     value: "Milk",
-    label: { en: "Milk", km: "ទឹកដោះគោ" },
+    label: {
+      en: "Milk",
+      km: "ទឹកដោះគោ",
+    },
   },
   {
     value: "Food & Nutrition",
@@ -29,11 +35,17 @@ const categories = [
   },
   {
     value: "Diapers",
-    label: { en: "Diapers", km: "ខោទឹកនោម" },
+    label: {
+      en: "Diapers",
+      km: "ខោទឹកនោម",
+    },
   },
   {
     value: "Essentials",
-    label: { en: "Essentials", km: "សម្ភារៈទូទៅ" },
+    label: {
+      en: "Essentials",
+      km: "សម្ភារៈទូទៅ",
+    },
   },
 ];
 
@@ -44,7 +56,7 @@ export default function CategoryFilter({
   const { language } = useLanguage();
 
   return (
-    <div className="scrollbar-hide mt-5 flex gap-3 overflow-x-auto pb-2">
+    <div className="scrollbar-hide mt-4 flex gap-2 overflow-x-auto pb-2">
       {categories.map((category) => {
         const active = selected === category.value;
 
@@ -53,17 +65,15 @@ export default function CategoryFilter({
             key={category.value}
             type="button"
             onClick={() => onChange(category.value)}
-            className={`
-              shrink-0 rounded-full border px-5 py-3
-              text-sm font-semibold
-              backdrop-blur-2xl
-              transition-all duration-300
-              ${
-                active
-                  ? "border-gold/70 bg-gold/20 text-gold shadow-[0_8px_30px_rgba(212,175,55,0.18)]"
-                  : "border-white/40 bg-white/10 text-slate-700 hover:border-white/60 hover:bg-white/20"
-              }
-            `}
+            className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold backdrop-blur-2xl transition-all duration-300 ${
+              active
+                ? "border-gold/60 !bg-transparent text-gold shadow-none"
+                : "border-white/40 bg-white/15 text-slate-600 hover:border-white/60 hover:bg-white/30"
+            } ${
+              language === "km"
+                ? "font-khmer leading-6"
+                : ""
+            }`}
           >
             {category.label[language]}
           </button>

@@ -31,7 +31,7 @@ const categories = [
   {
     value: "Essentials",
     label: {
-      en: "Baby Care",
+      en: "Essentials",
       km: "សម្ភារៈទូទៅ",
     },
     icon: Heart,

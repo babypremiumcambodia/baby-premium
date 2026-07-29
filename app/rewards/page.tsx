@@ -79,16 +79,34 @@ export default function RewardsPage() {
     setRedeeming(true);
 
     try {
-      const response = await fetch("/api/rewards/redeem", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customerId: customer.id,
-          rewardId: selectedReward.id,
-        }),
-      });
+      const telegramWebApp = window.Telegram?.WebApp as
+  | {
+      initData?: string;
+    }
+  | undefined;
+
+const initData = telegramWebApp?.initData ?? "";
+
+if (!initData) {
+  alert(
+    language === "km"
+      ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram ដើម្បីប្តូរយកអំណោយ។"
+      : "Open this app inside Telegram to redeem a gift."
+  );
+
+  return;
+}
+
+const response = await fetch("/api/rewards/redeem", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    initData,
+    rewardId: selectedReward.id,
+  }),
+});
 
       const responseText = await response.text();
 
@@ -270,7 +288,7 @@ export default function RewardsPage() {
                           className={`mt-4 rounded-full bg-white/60 px-4 py-3 text-center text-sm font-semibold text-gray-500 ${khmerText}`}
                         >
                           {language === "km"
-                            ? "កំពុងផ្ទុកសមតុល្យរបស់អ្នក..."
+                            ? "កំពុងផ្ទុកពិន្ទុរបស់អ្នក..."
                             : "Loading your balance..."}
                         </div>
                       ) : !customer ? (
@@ -327,7 +345,7 @@ export default function RewardsPage() {
                   className={`mt-2 text-gray-500 ${khmerText}`}
                 >
                   {language === "km"
-                    ? "កាដូរថ្មីៗនឹងបង្ហាញនៅទីនេះឆាប់ៗនេះ។"
+                    ? "កាដូរថ្មីៗនឹងបង្ហាញនៅទីនេះឆាប់ៗនេះ"
                     : "New thank you gifts will appear here soon."}
                 </p>
               </div>
@@ -364,7 +382,7 @@ export default function RewardsPage() {
               }`}
             >
               {language === "km"
-                ? "បានប្តូរអំណោយដោយជោគជ័យ"
+                ? "បានប្តូរកាដូរដោយជោគជ័យ"
                 : "Redeemed Successfully"}
             </h2>
 
@@ -372,7 +390,7 @@ export default function RewardsPage() {
               className={`mt-2 text-gray-500 ${khmerText}`}
             >
               {language === "km"
-                ? "អំណោយថ្លែងអំណរគុណរបស់អ្នកត្រូវបានប្តូររួចរាល់។"
+                ? "កាដូរប្ដូរសម្រាប់ការអរគុណត្រូវបានរួចរាល់"
                 : "Your thank you gift has been redeemed."}
             </p>
 
@@ -397,7 +415,7 @@ export default function RewardsPage() {
                 className={`text-sm text-gray-500 ${khmerText}`}
               >
                 {language === "km"
-                  ? "សមតុល្យនៅសល់"
+                  ? "ពិន្ទុនៅសល់"
                   : "Remaining Balance"}
               </p>
 
@@ -410,7 +428,7 @@ export default function RewardsPage() {
               className={`mt-5 text-sm text-gray-500 ${khmerText}`}
             >
               {language === "km"
-                ? "Baby Premium+ នឹងដាក់អំណោយនេះជាមួយការបញ្ជាទិញបន្ទាប់របស់អ្នក។"
+                ? "Baby Premium+ នឹងដាក់កាដូរនេះជាមួយការបញ្ជាទិញបន្ទាប់របស់អ្នក"
                 : "Baby Premium+ will include your gift with your upcoming order."}
             </p>
 
