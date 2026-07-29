@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   ShoppingBag,
-  Heart,
+  Gift,
   ShoppingCart,
   User,
 } from "lucide-react";
@@ -26,7 +26,7 @@ const navItems = [
   {
     href: "/rewards",
     label: { en: "Rewards", km: "រង្វាន់" },
-    icon: Heart,
+    icon: Gift,
   },
   {
     href: "/cart",
@@ -82,9 +82,15 @@ export default function BottomNavigation() {
               )}
             </div>
 
-            <span className="max-w-full truncate text-[10px] font-medium">
-              {item.label[language]}
-            </span>
+            <span
+               className={`max-w-full truncate text-[10px] font-medium ${
+               language === "km"
+               ? "font-khmer leading-5"
+               : "leading-4"
+               }`}
+               >
+  {item.label[language]}
+</span>
           </Link>
         );
       })}

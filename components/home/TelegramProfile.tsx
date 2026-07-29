@@ -22,7 +22,7 @@ export default function TelegramProfile() {
           className="h-8 w-8 shrink-0 rounded-full border border-white/70 object-cover"
         />
       ) : (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-bold text-white">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-bold text-white">
           {(user.first_name?.charAt(0) ?? "U").toUpperCase()}
         </div>
       )}

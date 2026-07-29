@@ -16,8 +16,6 @@ export default async function Home() {
       <div className="mx-auto max-w-md px-5 pt-8 pb-28">
         <HomeHeader />
 
-        <TelegramProfile />
-
         <HeroBanner />
 
         <SearchBar />
