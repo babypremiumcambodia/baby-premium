@@ -8,7 +8,7 @@ export default function HeroBanner() {
   const { language } = useLanguage();
 
   return (
-    <section className="glass mt-6 overflow-hidden rounded-[36px] p-6">
+    <section className="glass mt-3 overflow-hidden rounded-[36px] p-6">
       <p className="text-xs font-semibold tracking-[0.28em] text-gold">
         BABY PREMIUM+
       </p>
@@ -22,15 +22,13 @@ export default function HeroBanner() {
       >
         {language === "km" ? (
           <>
-            តម្រូវការប្រចាំថ្ងៃ
-            <br />
-            សម្រាប់កូនលោកអ្នក
+            តម្រូវការប្រចាំថ្ងៃសម្រាប់កូនលោកអ្នក
+      
           </>
         ) : (
           <>
-            Everyday Baby
-            <br />
-            Essentials
+            Everyday Essentials for Babies
+            
           </>
         )}
       </h2>

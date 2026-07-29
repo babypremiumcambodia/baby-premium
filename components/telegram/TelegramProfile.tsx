@@ -14,7 +14,7 @@ export default function TelegramProfile() {
     (language === "km" ? "អតិថិជន" : "Customer");
 
   return (
-    <div className="glass mb-4 mt-3 inline-flex max-w-full items-center gap-3 rounded-full px-3 py-2">
+    <div className="glass mt-3 inline-flex max-w-full items-center gap-3 rounded-full px-3 py-2">
       {user.photo_url ? (
         <img
           src={user.photo_url}
