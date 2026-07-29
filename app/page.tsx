@@ -5,7 +5,6 @@ import BannerSlider from "@/components/home/BannerSlider";
 import CategoryGrid from "@/components/home/CategoryGrid";
 import BottomNavigation from "@/components/layout/BottomNavigation";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
-import TelegramProfile from "@/components/telegram/TelegramProfile";
 import { getProducts } from "@/lib/products";
 
 export default async function Home() {

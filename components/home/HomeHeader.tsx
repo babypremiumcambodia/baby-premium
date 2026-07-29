@@ -1,20 +1,24 @@
 "use client";
 
-import TelegramProfile from "@/components/home/TelegramProfile";
+import TelegramProfile from "@/components/telegram/TelegramProfile";
 import { useLanguage } from "@/components/language/LanguageProvider";
 
 export default function HomeHeader() {
   const { language } = useLanguage();
 
   return (
-    <header className="flex items-center justify-between gap-3">
-      <div className="min-w-0">
+    <header className="relative flex min-h-12 items-center">
+      <div className="min-w-0 max-w-[105px]">
         <p
-          className={`text-sm text-gray-500 ${
-            language === "km" ? "font-khmer leading-5" : ""
+          className={`truncate text-sm text-gray-500 ${
+            language === "km"
+              ? "font-khmer leading-5"
+              : ""
           }`}
         >
-          {language === "km" ? "សូមស្វាគមន៍" : "Welcome,"}
+          {language === "km"
+            ? "សូមស្វាគមន៍"
+            : "Welcome,"}
         </p>
 
         <p
@@ -28,7 +32,9 @@ export default function HomeHeader() {
         </p>
       </div>
 
-      <TelegramProfile />
+      <div className="absolute left-1/2 -translate-x-1/2">
+        <TelegramProfile />
+      </div>
     </header>
   );
 }
