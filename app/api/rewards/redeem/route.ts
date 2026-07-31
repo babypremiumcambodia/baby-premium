@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "You do not have enough Love Points.",
+            "You do not have enough Love Points",
         },
         {
           status: 400,
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
         {
           error:
             redemptionError?.message ??
-            "Reward redemption was not created.",
+            "Reward redemption was not created",
         },
         {
           status: 500,
@@ -188,7 +188,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: "Failed to redeem the reward.",
+        error: "Failed to redeem the reward",
       },
       {
         status: 500,

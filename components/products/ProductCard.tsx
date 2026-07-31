@@ -54,7 +54,25 @@ export default function ProductCard({
       href={`/product/${id}`}
       className="block self-start"
     >
-      <GlassCard className="rounded-[24px] border border-white/80 !bg-white/45 p-2.5 shadow-[0_12px_35px_rgba(122,79,22,0.06)] backdrop-blur-[30px]">
+      <GlassCard
+  className="rounded-[24px] p-2.5 backdrop-blur-[30px]"
+  style={{
+    background: "transparent",
+    border: "1.5px solid transparent",
+    boxShadow: "0 12px 35px rgba(184,137,50,0.06)",
+  }}
+>
+
+  <div className="pointer-events-none absolute inset-0">
+  <span className="absolute left-0 top-0 h-25 w-14 rounded-tl-[24px] border-l-[1.5px] border-t-[1.5px] border-[#e4cfa0]/45 shadow-[-2px_-2px_8px_rgba(228,207,160,0.10)]" />
+
+  <span className="absolute right-0 top-0 h-25 w-14 rounded-tr-[24px] border-r-[1.5px] border-t-[1.5px] border-[#e4cfa0]/45 shadow-[2px_-2px_8px_rgba(228,207,160,0.10)]" />
+
+  <span className="absolute bottom-0 left-0 h-25 w-14 rounded-bl-[24px] border-b-[1.5px] border-l-[1.5px] border-[#e4cfa0]/45 shadow-[-2px_2px_8px_rgba(228,207,160,0.10)]" />
+
+  <span className="absolute bottom-0 right-0 h-25 w-14 rounded-br-[24px] border-b-[1.5px] border-r-[1.5px] border-[#e4cfa0]/45 shadow-[2px_2px_8px_rgba(228,207,160,0.10)]" />
+</div>
+
         <div className="relative">
   <Image
     src={image}
@@ -64,15 +82,6 @@ export default function ProductCard({
     className="mx-auto h-24 w-full object-contain"
   />
 
-  <span
-    className={`absolute -right-2.5 -top-1 rounded-full border border-[#d8c49a]/55 bg-white/15 px-2 py-1 text-[8px] font-semibold text-[#a48754] shadow-sm backdrop-blur-xl ${
-  language === "km"
-    ? "font-khmer leading-4"
-    : ""
-}`}
-  >
-    {language === "km" ? "ព័ត៌មាន" : "Details"}
-  </span>
 </div>
 
         
@@ -86,38 +95,25 @@ export default function ProductCard({
           {name}
         </h3>
         <div className="mt-0.5 flex items-center justify-between gap-2">
-        <p className="-ml-2 mt-0.5 text-base font-bold leading-5 text-gold">
+        <p className="-ml-2 mt-0.5 text-sm font-bold leading-5 text-gold">
           ${Number(price).toFixed(2)}
         </p>
 
-        
-          {outOfStock ? (
-            <span
-              className={`relative -right-2.5 inline-flex rounded-full border border-red-200/60 bg-white/15 px-2 py-0.5 text-[8px] font-semibold text-red-500/80 shadow-sm backdrop-blur-xl ${khmerText}`}
-              >
-              {language === "km"
-                ? "អស់ពីស្តុក"
-                : "Out of Stock"}
-            </span>
-          ) : stock <= 5 ? (
-            <span
-              className={`relative -right-2.5 inline-flex rounded-full border border-orange-200/60 bg-white/15 px-2 py-0.5 text-[8px] font-semibold text-orange-500/80 shadow-sm backdrop-blur-xl ${khmerText}`}
-              >
-              {language === "km"
-                ? "នៅសល់តិច"
-                : "Few Left"}
-            </span>
-          ) : (
-            <span
-              className={`relative -right-2.5 inline-flex rounded-full border border-emerald-200/60 bg-white/15 px-2 py-0.5 text-[8px] font-semibold text-emerald-600/80 shadow-sm backdrop-blur-xl ${khmerText}`}
-              >
-              {language === "km"
-                ? "មានស្តុក"
-                : "In Stock"}
-            </span>
-          )}
-        </div>
+        <span
+  className={`pointer-events-none inline-flex min-w-[105px] shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-emerald-200/80 bg-[linear-gradient(135deg,rgba(5,150,105,0.90),rgba(110,231,183,0.92))] px-3 py-1 font-semibold text-white shadow-[3px_4px_16px_rgba(5,150,105,0.18),inset_0_1px_1px_rgba(255,255,255,0.65)] backdrop-blur-xl ${
+    language === "km"
+      ? "relative -right-0_5 font-khmer text-[6px] leading-4"
+      : "relative -right-0_5 text-[7px] leading-4"
+  }`}
+>
+  {language === "km"
+    ? "លក្ខណៈពិសេស និងអត្ថប្រយោជន៍"
+    : "Features & Benefits"}
 
+</span>
+</div>
+
+  
         <div className="mt-2 flex items-center gap-0">
           <button
             type="button"
@@ -142,13 +138,13 @@ export default function ProductCard({
                 );
               }
             }}
-            className={`relative -left-2 flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-[10px] font-semibold text-white transition ${
-              outOfStock
-                ? "cursor-not-allowed bg-gray-400"
-                : "bg-gold hover:opacity-90 active:scale-[0.98]"
-            } ${khmerText}`}
-          >
-            <ShoppingCart className="h-5 w-5 shrink-0" />
+            className={`relative -left-2 -mr-2 flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-[10px] font-semibold text-white transition ${
+  outOfStock
+    ? "cursor-not-allowed bg-gray-400"
+    : "bg-gold hover:opacity-90 active:scale-[0.98]"
+} ${khmerText}`}
+>
+  <ShoppingCart className="h-5 w-5 shrink-0" />
 
             <span className="truncate">
               {outOfStock
@@ -178,19 +174,19 @@ export default function ProductCard({
     toggleItem(id);
   }}
   className={`relative -right-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border backdrop-blur-2xl transition-all duration-200 active:scale-90 ${
-    favoriteActive
-      ? "border-red-200/70 bg-red-50/40 shadow-[0_5px_16px_rgba(239,68,68,0.16)]"
-      : "border-white/70 bg-white/20 shadow-[0_5px_16px_rgba(23,36,59,0.08)]"
-  }`}
+  favoriteActive
+    ? "border-red-200/80 bg-[linear-gradient(to_top,rgba(239,68,68,0.92),rgba(251,113,133,0.88))] text-white shadow-[3px_4px_16px_rgba(239,68,68,0.20),inset_0_1px_1px_rgba(255,255,255,0.60)]"
+    : "border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.55),rgba(255,255,255,0.20))] shadow-[3px_4px_16px_rgba(23,36,59,0.10),inset_0_1px_1px_rgba(255,255,255,0.75)]"
+}`}
 >
   <Heart
-    className={`h-[18px] w-[18px] transition-all duration-200 ${
-      favoriteActive
-        ? "scale-110 fill-red-500 text-red-500"
-        : "text-slate-400"
-    }`}
-    strokeWidth={2}
-  />
+  className={`h-[18px] w-[18px] transition-all duration-200 ${
+    favoriteActive
+      ? "scale-110 fill-white text-white"
+      : "text-slate-400"
+  }`}
+  strokeWidth={2}
+/>
 </button>
         </div>
       </GlassCard>

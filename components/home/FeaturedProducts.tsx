@@ -38,7 +38,7 @@ export default function FeaturedProducts({
             }`}
           >
             {language === "km"
-              ? "ផលិតផលពិសេស"
+              ? "ជម្រើសល្អ ផលិតផលថ្មី"
               : "Featured Products"}
           </h2>
 

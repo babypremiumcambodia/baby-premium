@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { useCartStore } from "@/lib/cartStore";
 import { useTelegramUser } from "@/hooks/useTelegramUser";
 import { useCustomer } from "@/hooks/useCustomer";
+import Image from "next/image";
 
 const paymentMethods = [
   {
@@ -36,6 +37,12 @@ const paymentMethods = [
   },
 ];
 
+type LocationStatus =
+  | ""
+  | "unsupported"
+  | "success"
+  | "error";
+  
 export default function CheckoutPage() {
   const router = useRouter();
   const { language } = useLanguage();
@@ -68,7 +75,7 @@ export default function CheckoutPage() {
         ...previous,
         location_status:
           language === "km"
-            ? "ឧបករណ៍នេះមិនគាំទ្រការចែករំលែកទីតាំងទេ"
+            ? "ឧបករណ៍នេះមិនអាចដាក់ទីតាំងបានទេ"
             : "Location is not supported on this device",
       }));
       return;
@@ -82,7 +89,7 @@ export default function CheckoutPage() {
           longitude: position.coords.longitude,
           location_status:
             language === "km"
-              ? "បានចែករំលែកទីតាំងដោយជោគជ័យ"
+              ? "បានដាក់ទីតាំងដោយជោគជ័យ"
               : "Location shared successfully",
         }));
       },
@@ -91,7 +98,7 @@ export default function CheckoutPage() {
           ...previous,
           location_status:
             language === "km"
-              ? "មិនអាចទទួលទីតាំងបានទេ អ្នកនៅតែអាចបញ្ជាទិញបាន"
+              ? "មិនអាចទទួលបានទីតាំងទេ ប៉ុន្តែអ្នកនៅតែអាចបញ្ជាទិញបាន"
               : "Could not get location. You can still place the order",
         }));
       }
@@ -183,8 +190,8 @@ export default function CheckoutPage() {
       if (newStock < 0) {
         alert(
           language === "km"
-            ? `${item.name} មិនមានស្តុកគ្រប់គ្រាន់ទេ។`
-            : `${item.name} does not have enough stock.`
+            ? `${item.name} មិនមានស្តុកគ្រប់គ្រាន់ទេ`
+            : `${item.name} does not have enough stock`
         );
         return;
       }
@@ -281,7 +288,7 @@ export default function CheckoutPage() {
         >
           {language === "km"
             ? "បញ្ចូលព័ត៌មានដឹកជញ្ជូន និងវិធីបង់ប្រាក់"
-            : "Enter your delivery and payment details."}
+            : "Enter your delivery and payment details"}
         </p>
 
         <GlassCard className="mt-6 space-y-4">
@@ -329,7 +336,7 @@ export default function CheckoutPage() {
           <textarea
             placeholder={
               language === "km"
-                ? "កំណត់សម្គាល់សម្រាប់ការដឹកជញ្ជូន (មិនចាំបាច់)"
+                ? "កំណត់សម្គាល់សម្រាប់ការដឹកជញ្ជូន (ព័ត៌មានបន្ថែម)"
                 : "Delivery Note (optional)"
             }
             value={form.delivery_note}
@@ -347,19 +354,28 @@ export default function CheckoutPage() {
           />
 
           <button
-            type="button"
-            onClick={handleShareLocation}
-            className={`w-full rounded-full border border-gold py-4 font-semibold text-gold ${
-              language === "km"
-                ? "font-khmer leading-7"
-                : ""
-            }`}
-          >
-            📍{" "}
-            {language === "km"
-              ? "ដាក់ទីតាំងរបស់ខ្ញុំ"
-              : "Share My Location"}
-          </button>
+  type="button"
+  onClick={handleShareLocation}
+  className={`flex w-full items-center justify-center gap-2 rounded-full bg-gold py-3 font-semibold text-white ${
+  language === "km"
+    ? "font-khmer leading-7"
+    : ""
+}`}
+>
+  <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+    <img
+      src="/map.png"
+      alt="Map"
+      className="h-16 w-16 shrink-0 scale-100 object-contain"
+    />
+  </span>
+
+  <span>
+    {language === "km"
+      ? "ដាក់ទីតាំងរបស់ខ្ញុំ"
+      : "Share My Location"}
+  </span>
+</button>
 
           {form.location_status && (
             <p

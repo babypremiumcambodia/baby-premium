@@ -103,8 +103,8 @@ export default function WishlistPage() {
           }`}
         >
           {language === "km"
-            ? "ផលិតផលដែលអ្នកចូលចិត្ត។"
-            : "Your favorite baby products."}
+            ? "ផលិតផលដែលអ្នកចូលចិត្ត"
+            : "Your favorite baby products"}
         </p>
 
         {loading ? (
@@ -152,7 +152,7 @@ export default function WishlistPage() {
             >
               {language === "km"
                 ? "ចុចរូបបេះដូងលើផលិតផល ដើម្បីរក្សាទុកនៅទីនេះ។"
-                : "Tap the heart on a product to save it here."}
+                : "Tap the heart on a product to save it here"}
             </p>
           </GlassCard>
         )}

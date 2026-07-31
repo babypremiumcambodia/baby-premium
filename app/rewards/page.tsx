@@ -346,7 +346,7 @@ const response = await fetch("/api/rewards/redeem", {
                 >
                   {language === "km"
                     ? "កាដូរថ្មីៗនឹងបង្ហាញនៅទីនេះឆាប់ៗនេះ"
-                    : "New thank you gifts will appear here soon."}
+                    : "New thank you gifts will appear here soon"}
                 </p>
               </div>
             </GlassCard>
@@ -391,7 +391,7 @@ const response = await fetch("/api/rewards/redeem", {
             >
               {language === "km"
                 ? "សូមអរគុណកាដូរប្ដូរត្រូវបានរួចរាល់"
-                : "Your thank you gift has been redeemed."}
+                : "Your thank you gift has been redeemed"}
             </p>
 
             {redeemedReward.image && (
@@ -429,7 +429,7 @@ const response = await fetch("/api/rewards/redeem", {
             >
               {language === "km"
                 ? "Baby Premium+ នឹងដាក់កាដូរនេះជាមួយការបញ្ជាទិញបន្ទាប់របស់អ្នក"
-                : "Baby Premium+ will include your gift with your upcoming order."}
+                : "Baby Premium+ will include your gift with your upcoming order"}
             </p>
 
             <button

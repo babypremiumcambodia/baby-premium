@@ -77,7 +77,7 @@ export default function ShopClient({
         >
           {language === "km"
             ? "ជ្រើសរើសតែផលិតផលដែលល្អសម្រាប់កូនៗ"
-            : "Find premium products for you and your little one."}
+            : "Find premium products"}
         </p>
 
         <div className="mt-6">

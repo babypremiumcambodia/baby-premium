@@ -24,9 +24,14 @@ export default function SearchBar() {
 
   return (
     <form
-      onSubmit={handleSubmit}
-      className="glass group relative mt-6 flex items-center rounded-[24px]"
-    >
+  onSubmit={handleSubmit}
+  className="group relative mt-6 flex items-center rounded-[24px] border border-white/70 backdrop-blur-[24px]"
+  style={{
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    boxShadow:
+      "0 10px 30px rgba(122, 79, 22, 0.07), inset 0 1px 1px rgba(255, 255, 255, 0.75)",
+  }}
+>
       <Search className="pointer-events-none absolute left-5 h-5 w-5 text-gold" />
 
       <input

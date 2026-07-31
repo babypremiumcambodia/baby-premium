@@ -33,7 +33,7 @@ export default function EnableNotifications() {
             className={`mt-1 text-sm text-gray-500 ${khmerText}`}
           >
             {language === "km"
-              ? "ទទួលបានព័ត៌មានថ្មីៗ នៅពេលការបញ្ជាទិញត្រូវបានបញ្ជាក់ រៀបចំ ដឹកជញ្ជូន ឬដឹកដល់"
+              ? "ទទួលការជូនដំណឹង នៅពេលការបញ្ជាទិញរបស់អ្នកត្រូវបានបញ្ជាក់ កំពុងរៀបចំ ដឹកជញ្ជូន ឬបានដឹកជញ្ជូនរួចរាល់"
               : "Get updates when your order is confirmed, prepared, shipped, or delivered"}
           </p>
         </div>

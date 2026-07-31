@@ -37,7 +37,7 @@ export default function TrackOrderPage() {
       setError(
         language === "km"
           ? "សូមបញ្ចូលលេខបញ្ជាទិញរបស់អ្នក"
-          : "Please enter your order number."
+          : "Please enter your order number"
       );
       return;
     }
@@ -54,7 +54,7 @@ export default function TrackOrderPage() {
       setError(
         language === "km"
           ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram ដើម្បីតាមដានការបញ្ជាទិញ"
-          : "Open this app inside Telegram to track your order."
+          : "Open this app inside Telegram to track your order"
       );
       return;
     }
@@ -78,7 +78,7 @@ export default function TrackOrderPage() {
         setError(
           language === "km"
             ? "មិនអាចស្វែងរកការបញ្ជាទិញបានទេ"
-            : result.error ?? "Unable to find order."
+            : result.error ?? "Unable to find order"
         );
         return;
       }
@@ -102,7 +102,7 @@ export default function TrackOrderPage() {
         setError(
           language === "km"
             ? "រកមិនឃើញការបញ្ជាទិញនេះក្នុងគណនីរបស់អ្នក"
-            : "This order was not found in your account."
+            : "This order was not found in your account"
         );
         return;
       }
@@ -114,7 +114,7 @@ export default function TrackOrderPage() {
       setError(
         language === "km"
           ? "មានបញ្ហាកើតឡើង សូមព្យាយាមម្តងទៀត"
-          : "Something went wrong. Please try again."
+          : "Something went wrong. Please try again"
       );
     } finally {
       setSearching(false);
@@ -158,7 +158,7 @@ export default function TrackOrderPage() {
         >
           {language === "km"
             ? "បញ្ចូលលេខបញ្ជាទិញ ដើម្បីពិនិត្យមើលស្ថានភាព"
-            : "Enter your order number to check its status."}
+            : "Enter your order number to check its status"}
         </p>
 
         <GlassCard className="mt-6 space-y-4">

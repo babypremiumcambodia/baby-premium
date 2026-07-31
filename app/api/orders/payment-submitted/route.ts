@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Telegram authentication is missing or invalid.",
+            "Telegram authentication is missing or invalid",
         },
         {
           status: 401,
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Order was not found in your account.",
+            "Order was not found in your account",
         },
         {
           status: 404,
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: "Failed to submit payment.",
+        error: "Failed to submit payment",
       },
       {
         status: 500,

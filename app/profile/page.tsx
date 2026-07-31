@@ -63,7 +63,7 @@ export default function ProfilePage() {
         >
           {language === "km"
             ? "គ្រប់គ្រងគណនី និងមើលព័ត៌មានរបស់អ្នក"
-            : "Manage your account and view your information."}
+            : "Manage your account and view your information"}
         </p>
 
         <GlassCard className="mt-6">
