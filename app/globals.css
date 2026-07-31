@@ -192,6 +192,39 @@ button.bg-gold:disabled {
     );
 }
 
+/* Banner blurry glowing frame */
+
+.banner-glow {
+  position: relative;
+  isolation: isolate;
+  border-radius: 28px;
+  padding: 2px;
+
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+
+  box-shadow:
+    0 0 12px 4px rgba(255, 255, 255, 0.9),
+    0 0 28px 8px rgba(232, 210, 164, 0.38);
+}
+
+.banner-glow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 10;
+  pointer-events: none;
+
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 32px;
+
+  filter: blur(4px);
+
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.95),
+    0 0 22px rgba(184, 137, 50, 0.28);
+}
+
 /* ===========================
    Khmer Font
 =========================== */

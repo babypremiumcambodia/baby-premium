@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Crown } from "lucide-react";
 
 const banners = [
   "/banners/banner-1.png",
@@ -25,8 +24,8 @@ export default function BannerSlider() {
   }, []);
 
   return (
-    <section className="mt-6 overflow-hidden rounded-[30px] border border-white/60 bg-white/25 p-1 shadow-[0_12px_35px_rgba(122,79,22,0.10)] backdrop-blur-2xl">
-  <div className="relative aspect-[2/1] overflow-hidden rounded-[25px] bg-white/20">
+    <section className="banner-glow mt-6">
+      <div className="relative aspect-[2/1] overflow-hidden rounded-[25px] bg-transparent">
         {banners.map((banner, index) => (
           <Image
             key={banner}
@@ -43,7 +42,7 @@ export default function BannerSlider() {
           />
         ))}
 
-          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 rounded-full bg-black/15 px-3 py-2 backdrop-blur-xl">
+        <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 rounded-full bg-black/15 px-3 py-2 backdrop-blur-xl">
           {banners.map((banner, index) => (
             <button
               key={banner}
