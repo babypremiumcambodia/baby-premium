@@ -54,14 +54,7 @@ export default function ProductCard({
       href={`/product/${id}`}
       className="block self-start"
     >
-      <GlassCard
-  className="rounded-[24px] p-2.5 backdrop-blur-[30px]"
-  style={{
-    background: "transparent",
-    border: "1.5px solid transparent",
-    boxShadow: "0 12px 35px rgba(184,137,50,0.06)",
-  }}
->
+      <GlassCard className="product-glass rounded-[24px] p-2.5">
 
   <div className="pointer-events-none absolute inset-0">
   <span className="absolute left-0 top-0 h-25 w-14 rounded-tl-[24px] border-l-[1.5px] border-t-[1.5px] border-[#e4cfa0]/45 shadow-[-2px_-2px_8px_rgba(228,207,160,0.10)]" />
