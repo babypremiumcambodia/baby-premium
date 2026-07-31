@@ -87,25 +87,23 @@ export default function ProductCard({
         <h3 className="-ml-2 mt-1 line-clamp-2 min-h-[32px] text-[12px] font-semibold leading-4 text-slate-900">
           {name}
         </h3>
-        <div className="mt-0.5 flex items-center justify-between gap-2">
-        <p className="-ml-2 mt-0.5 text-sm font-bold leading-5 text-gold">
-          ${Number(price).toFixed(2)}
-        </p>
+        <div className="mt-1 flex min-w-0 items-center gap-1">
+  <p className="shrink-0 text-[15px] font-bold leading-5 text-gold">
+    ${Number(price).toFixed(2)}
+  </p>
 
-        <span
-  className={`pointer-events-none inline-flex min-w-[105px] shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-emerald-200/80 bg-[linear-gradient(135deg,rgba(5,150,105,0.90),rgba(110,231,183,0.92))] px-3 py-1 font-semibold text-white shadow-[3px_4px_16px_rgba(5,150,105,0.18),inset_0_1px_1px_rgba(255,255,255,0.65)] backdrop-blur-xl ${
-    language === "km"
-      ? "relative -right-0_5 font-khmer text-[6px] leading-4"
-      : "relative -right-0_5 text-[7px] leading-4"
-  }`}
->
-  {language === "km"
-    ? "លក្ខណៈពិសេស និងអត្ថប្រយោជន៍"
-    : "Features & Benefits"}
-
-</span>
+  <span
+    className={`pointer-events-none flex min-w-0 flex-1 items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-emerald-200/80 bg-[linear-gradient(135deg,rgba(5,150,105,0.90),rgba(110,231,183,0.92))] px-1 py-1 text-[7px] font-semibold text-white shadow-[3px_4px_16px_rgba(5,150,105,0.18),inset_0_1px_1px_rgba(255,255,255,0.65)] backdrop-blur-xl ${
+      language === "km"
+        ? "font-khmer text-[6px] leading-4 tracking-[-0.05em]"
+        : "tracking-[-0.02em]"
+    }`}
+  >
+    {language === "km"
+      ? "លក្ខណៈពិសេស និងអត្ថប្រយោជន៍"
+      : "Features & Benefits"}
+  </span>
 </div>
-
   
         <div className="mt-2 flex items-center gap-0">
           <button
