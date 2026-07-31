@@ -39,7 +39,7 @@ export default function TelegramProfile() {
         </p>
 
         <p
-          className={`truncate font-semibold text-slate-900 ${
+          className={`truncate font-normal text-slate-900 ${
   language === "km"
     ? "max-w-[100px] font-khmer text-[10px] leading-4"
     : "max-w-[75px] text-[9px] leading-3"
