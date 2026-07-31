@@ -42,6 +42,7 @@ export default function RootLayout({
       </head>
 
       <body>
+
         <LanguageProvider>
           <div className="fixed right-4 top-4 z-[100]">
             <LanguageSwitcher />
