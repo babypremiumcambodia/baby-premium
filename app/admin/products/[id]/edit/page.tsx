@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import type { Area } from "react-easy-crop";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { createCroppedPng } from "@/lib/cropImage";
 import AdminBackButton from "@/components/admin/AdminBackButton";
 import BarcodeInput from "@/components/admin/BarcodeInput";
+import ProductImageCropper from "@/components/admin/ProductImageCropper";
 
 export default function EditProductPage() {
   const router = useRouter();
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const id = Number(params.id);
 
   const [form, setForm] = useState({
@@ -23,6 +26,9 @@ export default function EditProductPage() {
   });
 
   const [preview, setPreview] = useState("");
+  const [selectedImage, setSelectedImage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function loadProduct() {
@@ -51,60 +57,131 @@ export default function EditProductPage() {
       setPreview(data.image ?? "");
     }
 
-    if (id) loadProduct();
+    if (id) {
+      loadProduct();
+    }
   }, [id]);
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement
+    >
   ) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm((previous) => ({
+      ...previous,
+      [event.target.name]: event.target.value,
+    }));
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  function handleImageSelect(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files?.[0];
 
     if (!file) return;
 
-    const fileName = `${Date.now()}-${file.name}`;
-
-    const { error } = await supabase.storage
-      .from("product-images")
-      .upload(fileName, file);
-
-    if (error) {
-      alert(error.message);
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file.");
       return;
     }
 
-    const { data } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(fileName);
+    if (selectedImage) {
+      URL.revokeObjectURL(selectedImage);
+    }
 
-    setForm((prev) => ({
-      ...prev,
-      image: data.publicUrl,
-    }));
+    setSelectedImage(URL.createObjectURL(file));
 
-    setPreview(data.publicUrl);
+    // Allows selecting the same file again.
+    event.target.value = "";
+  }
+
+  async function handleCroppedUpload(cropArea: Area) {
+    if (!selectedImage) return;
+
+    setUploading(true);
+
+    try {
+      const pngBlob = await createCroppedPng(
+        selectedImage,
+        cropArea
+      );
+
+      const fileName =
+        `products/${Date.now()}-product.png`;
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from("product-images")
+          .upload(fileName, pngBlob, {
+            contentType: "image/png",
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      setForm((previous) => ({
+        ...previous,
+        image: data.publicUrl,
+      }));
+
+      setPreview(data.publicUrl);
+
+      URL.revokeObjectURL(selectedImage);
+      setSelectedImage("");
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Could not crop and upload the image."
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleCropCancel() {
+    if (selectedImage) {
+      URL.revokeObjectURL(selectedImage);
+    }
+
+    setSelectedImage("");
   }
 
   async function handleSave() {
+    if (!form.name.trim()) {
+      alert("Please enter the product name.");
+      return;
+    }
+
+    if (!form.image) {
+      alert("Please upload and crop a product image.");
+      return;
+    }
+
+    setSaving(true);
+
     const { error } = await supabase
       .from("products")
       .update({
-        name: form.name,
-        brand: form.brand,
-        category: form.category,
+        name: form.name.trim(),
+        brand: form.brand.trim(),
+        category: form.category.trim(),
         price: Number(form.price),
         stock: Number(form.stock),
-        barcode: form.barcode,
-        description: form.description,
+        barcode: form.barcode.trim(),
+        description: form.description.trim(),
         image: form.image,
       })
       .eq("id", id);
+
+    setSaving(false);
 
     if (error) {
       alert(error.message);
@@ -123,7 +200,9 @@ export default function EditProductPage() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-bold">Edit Product</h1>
+          <h1 className="text-4xl font-bold">
+            Edit Product
+          </h1>
         </div>
 
         <div className="space-y-4">
@@ -153,6 +232,9 @@ export default function EditProductPage() {
 
           <input
             name="price"
+            type="number"
+            min="0"
+            step="0.01"
             placeholder="Price"
             value={form.price}
             onChange={handleChange}
@@ -161,6 +243,9 @@ export default function EditProductPage() {
 
           <input
             name="stock"
+            type="number"
+            min="0"
+            step="1"
             placeholder="Stock"
             value={form.stock}
             onChange={handleChange}
@@ -168,31 +253,40 @@ export default function EditProductPage() {
           />
 
           <BarcodeInput
-  value={form.barcode}
-  onChange={(code) =>
-    setForm((prev) => ({
-      ...prev,
-      barcode: code,
-    }))
-  }
-/>
+            value={form.barcode}
+            onChange={(code) =>
+              setForm((previous) => ({
+                ...previous,
+                barcode: code,
+              }))
+            }
+          />
 
           <label className="block rounded-xl border bg-white p-4">
-            <span className="font-semibold">Upload Product Image</span>
+            <span className="font-semibold">
+              Replace Product Image
+            </span>
+
             <input
               type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handleImageSelect}
               className="mt-3 block w-full"
             />
           </label>
 
           {preview && (
-            <img
-              src={preview}
-              alt="Product preview"
-              className="mx-auto h-48 object-contain"
-            />
+            <div className="rounded-[24px] border border-white/70 bg-white/30 p-4">
+              <img
+                src={preview}
+                alt="Product preview"
+                className="mx-auto aspect-square w-full max-w-[260px] object-contain"
+              />
+
+              <p className="mt-2 text-center text-xs text-gray-500">
+                Current product image
+              </p>
+            </div>
           )}
 
           <textarea
@@ -205,13 +299,23 @@ export default function EditProductPage() {
 
           <button
             type="button"
+            disabled={saving || uploading}
             onClick={handleSave}
-            className="w-full rounded-full bg-gold py-4 font-semibold text-white"
+            className="w-full rounded-full bg-gold py-4 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Save Changes
+            {saving ? "Saving…" : "Save Changes"}
           </button>
         </div>
       </div>
+
+      {selectedImage && (
+        <ProductImageCropper
+          image={selectedImage}
+          uploading={uploading}
+          onCancel={handleCropCancel}
+          onConfirm={handleCroppedUpload}
+        />
+      )}
     </main>
   );
 }

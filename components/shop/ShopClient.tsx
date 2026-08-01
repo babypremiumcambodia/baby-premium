@@ -157,8 +157,8 @@ export default function ShopClient({
                 }`}
               >
                 {language === "km"
-                  ? "សូមសាកល្បងស្វែងរក ប្រភេទ ឬម៉ាកផ្សេងទៀត។"
-                  : "Try another search, category, or brand."}
+                  ? "សូមសាកល្បងស្វែងរក ប្រភេទ ឬម៉ាកផ្សេងទៀត"
+                  : "Try another search, category, or brand"}
               </p>
             </div>
           )}

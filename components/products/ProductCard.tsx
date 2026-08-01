@@ -14,7 +14,7 @@ type ProductProps = {
   name: string;
   brand?: string | null;
   price: number;
-  image: string;
+  image?: string | null;
   stock?: number;
 };
 
@@ -45,6 +45,9 @@ export default function ProductCard({
 
   const favoriteActive = mounted && isFavorite;
   const outOfStock = stock <= 0;
+  
+  const productImage =
+  image?.trim() || "/logo/baby-premium.png";
 
   const khmerText =
     language === "km" ? "font-khmer leading-5" : "";
@@ -68,7 +71,7 @@ export default function ProductCard({
 
         <div className="relative">
   <Image
-    src={image}
+    src={productImage}
     alt={name}
     width={140}
     height={140}
@@ -118,7 +121,7 @@ export default function ProductCard({
                 id,
                 name,
                 price: Number(price),
-                image,
+                image: productImage,
                 stock,
               });
 

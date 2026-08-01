@@ -22,12 +22,7 @@ export default async function ProductPage({
   return (
     <main className="min-h-screen bg-premium px-5 py-8">
       <div className="mx-auto max-w-md">
-        <Link
-          href="/shop"
-          className="font-semibold text-gold"
-        >
-          ← Back
-        </Link>
+        
 
         <ProductDetail product={product} />
       </div>
