@@ -9,6 +9,37 @@ import AdminBackButton from "@/components/admin/AdminBackButton";
 import BarcodeInput from "@/components/admin/BarcodeInput";
 import ProductImageCropper from "@/components/admin/ProductImageCropper";
 
+const subcategoryOptions: Record<string, string[]> = {
+  Formula: [
+    "Cow's Milk",
+    "A2 & Organic",
+    "Goat Milk",
+    "Sensitive & Allergy",
+  ],
+  Milk: [
+    "Kids Milk",
+    "Adult & Senior",
+    "Pregnancy",
+  ],
+  "Food & Nutrition": [
+    "Cereals",
+    "Snacks",
+    "Yogurt",
+    "Vitamins & Supplements",
+  ],
+  Diapers: [
+    "Pants",
+    "Tape",
+    "Pads",
+  ],
+  Essentials: [
+    "Baby Wipes",
+    "Bath & Skincare",
+    "Feeding",
+    "Accessories",
+  ],
+};
+
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -18,6 +49,7 @@ export default function EditProductPage() {
     name: "",
     brand: "",
     category: "",
+    subcategory: "",
     price: "",
     stock: "",
     barcode: "",
@@ -47,6 +79,7 @@ export default function EditProductPage() {
         name: data.name ?? "",
         brand: data.brand ?? "",
         category: data.category ?? "",
+        subcategory: data.subcategory ?? "",
         price: String(data.price ?? ""),
         stock: String(data.stock ?? ""),
         barcode: data.barcode ?? "",
@@ -64,12 +97,24 @@ export default function EditProductPage() {
 
   function handleChange(
     event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
+      | HTMLInputElement
+      | HTMLTextAreaElement
+      | HTMLSelectElement
     >
   ) {
     setForm((previous) => ({
       ...previous,
       [event.target.name]: event.target.value,
+    }));
+  }
+
+  function handleCategoryChange(
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) {
+    setForm((previous) => ({
+      ...previous,
+      category: event.target.value,
+      subcategory: "",
     }));
   }
 
@@ -90,8 +135,6 @@ export default function EditProductPage() {
     }
 
     setSelectedImage(URL.createObjectURL(file));
-
-    // Allows selecting the same file again.
     event.target.value = "";
   }
 
@@ -160,6 +203,16 @@ export default function EditProductPage() {
       return;
     }
 
+    if (!form.category) {
+      alert("Please select a category.");
+      return;
+    }
+
+    if (!form.subcategory) {
+      alert("Please select a product type.");
+      return;
+    }
+
     if (!form.image) {
       alert("Please upload and crop a product image.");
       return;
@@ -172,7 +225,8 @@ export default function EditProductPage() {
       .update({
         name: form.name.trim(),
         brand: form.brand.trim(),
-        category: form.category.trim(),
+        category: form.category,
+        subcategory: form.subcategory,
         price: Number(form.price),
         stock: Number(form.stock),
         barcode: form.barcode.trim(),
@@ -222,13 +276,40 @@ export default function EditProductPage() {
             className="w-full rounded-xl border p-4"
           />
 
-          <input
+          <select
             name="category"
-            placeholder="Category"
             value={form.category}
-            onChange={handleChange}
-            className="w-full rounded-xl border p-4"
-          />
+            onChange={handleCategoryChange}
+            className="w-full rounded-xl border bg-white p-4"
+          >
+            <option value="">Select Category</option>
+            <option value="Formula">Formula</option>
+            <option value="Milk">Milk</option>
+            <option value="Food & Nutrition">
+              Food & Nutrition
+            </option>
+            <option value="Diapers">Diapers</option>
+            <option value="Essentials">Essentials</option>
+          </select>
+
+          {form.category && (
+            <select
+              name="subcategory"
+              value={form.subcategory}
+              onChange={handleChange}
+              className="w-full rounded-xl border bg-white p-4"
+            >
+              <option value="">Select Product Type</option>
+
+              {(subcategoryOptions[form.category] ?? []).map(
+                (option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                )
+              )}
+            </select>
+          )}
 
           <input
             name="price"

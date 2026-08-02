@@ -14,9 +14,164 @@ type Product = {
   name: string;
   brand: string | null;
   category: string;
+  subcategory: string | null;
   price: number;
   image: string;
   stock: number;
+};
+
+type SubcategoryOption = {
+  value: string;
+  label: {
+    en: string;
+    km: string;
+  };
+};
+
+const subcategoryOptions: Record<
+  string,
+  SubcategoryOption[]
+> = {
+  Formula: [
+    {
+      value: "Cow's Milk",
+      label: {
+        en: "Cow's Milk",
+        km: "ទឹកដោះគោ",
+      },
+    },
+    {
+      value: "A2 & Organic",
+      label: {
+        en: "A2 & Organic",
+        km: "A2 និងសរីរាង្គ",
+      },
+    },
+    {
+      value: "Goat Milk",
+      label: {
+        en: "Goat Milk",
+        km: "ទឹកដោះពពែ",
+      },
+    },
+    {
+      value: "Sensitive & Allergy",
+      label: {
+        en: "Sensitive & Allergy",
+        km: "ងាយប្រតិកម្ម និងអាឡែស៊ី",
+      },
+    },
+  ],
+
+  Milk: [
+    {
+      value: "Kids Milk",
+      label: {
+        en: "Kids Milk",
+        km: "សម្រាប់កូនៗ",
+      },
+    },
+    {
+      value: "Adult & Senior",
+      label: {
+        en: "Adult & Senior",
+        km: "មនុស្សពេញវ័យ និងមនុស្សចាស់",
+      },
+    },
+    {
+      value: "Pregnancy",
+      label: {
+        en: "Pregnancy",
+        km: "សម្រាប់ស្ត្រីមានផ្ទៃពោះ និងបំបៅដោះកូន",
+      },
+    },
+  ],
+
+  "Food & Nutrition": [
+    {
+      value: "Cereal",
+      label: {
+        en: "Cereal",
+        km: "បបរ",
+      },
+    },
+    {
+      value: "Snacks",
+      label: {
+        en: "Snacks",
+        km: "នំ",
+      },
+    },
+    {
+      value: "Yogurt",
+      label: {
+        en: "Yogurt",
+        km: "យ៉ាអួ",
+      },
+    },
+    {
+      value: "Vitamins & Supplements",
+      label: {
+        en: "Vitamins & Supplements",
+        km: "វីតាមីន និងអាហារបំប៉ន",
+      },
+    },
+  ],
+
+  Diapers: [
+    {
+      value: "Pants",
+      label: {
+        en: "Pants",
+        km: "ខោទឹកនោមស្លៀក",
+      },
+    },
+    {
+      value: "Tape",
+      label: {
+        en: "Tape",
+        km: "ខោទឹកនោមបកបិត",
+      },
+    },
+    {
+      value: "Pads",
+      label: {
+        en: "Pads",
+        km: "កម្រាលទ្រនាប់",
+      },
+    },
+  ],
+
+  Essentials: [
+    {
+      value: "Baby Wipes",
+      label: {
+        en: "Baby Wipes",
+        km: "ក្រដាសសើម",
+      },
+    },
+    {
+      value: "Bath & Skincare",
+      label: {
+        en: "Bath & Skincare",
+        km: "សម្រាប់ងូតទឹក និងថែរក្សាស្បែក",
+      },
+    },
+    {
+      value: "Feeding",
+      label: {
+        en: "Feeding",
+        km: "សម្ភារៈបំបៅ",
+      },
+    },
+    {
+      value: "Accessories",
+      label: {
+        en: "Accessories",
+        km: "សម្ភារៈបន្ថែម",
+      },
+    },
+  ],
 };
 
 export default function ShopClient({
@@ -26,33 +181,74 @@ export default function ShopClient({
 }) {
   const { language } = useLanguage();
   const searchParams = useSearchParams();
-  const selectedBrand = searchParams.get("brand") ?? "";
+
+  const selectedBrand =
+    searchParams.get("brand") ?? "";
 
   const [search, setSearch] = useState(
-  searchParams.get("search") ?? ""
-);
-  const [selectedCategory, setSelectedCategory] = useState(
-  searchParams.get("category") ?? "All"
-);
+    searchParams.get("search") ?? ""
+  );
+
+  const [selectedCategory, setSelectedCategory] =
+    useState(
+      searchParams.get("category") ?? "All"
+    );
+
+  const [selectedSubcategory, setSelectedSubcategory] =
+    useState(
+      searchParams.get("subcategory") ?? ""
+    );
+
+  const availableSubcategories =
+    subcategoryOptions[selectedCategory] ?? [];
+
+  function handleCategoryChange(category: string) {
+    setSelectedCategory(category);
+    setSelectedSubcategory("");
+  }
 
   const filteredProducts = products.filter((product) => {
     const productBrand = product.brand ?? "";
-    const searchText = search.toLowerCase().trim();
+    const productSubcategory =
+      product.subcategory ?? "";
+
+    const searchText = search
+      .toLowerCase()
+      .trim();
 
     const matchesSearch =
-      product.name.toLowerCase().includes(searchText) ||
-      productBrand.toLowerCase().includes(searchText) ||
-      product.category.toLowerCase().includes(searchText);
+      product.name
+        .toLowerCase()
+        .includes(searchText) ||
+      productBrand
+        .toLowerCase()
+        .includes(searchText) ||
+      product.category
+        .toLowerCase()
+        .includes(searchText) ||
+      productSubcategory
+        .toLowerCase()
+        .includes(searchText);
 
     const matchesCategory =
       selectedCategory === "All" ||
       product.category === selectedCategory;
 
+    const matchesSubcategory =
+      !selectedSubcategory ||
+      productSubcategory === selectedSubcategory;
+
     const matchesBrand =
       !selectedBrand ||
-      productBrand.toLowerCase() === selectedBrand.toLowerCase();
+      productBrand.toLowerCase() ===
+        selectedBrand.toLowerCase();
 
-    return matchesSearch && matchesCategory && matchesBrand;
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesSubcategory &&
+      matchesBrand
+    );
   });
 
   return (
@@ -65,7 +261,9 @@ export default function ShopClient({
               : "text-4xl leading-tight"
           }`}
         >
-          {language === "km" ? "ហាងទំនិញ" : "Shop"}
+          {language === "km"
+            ? "ហាងទំនិញ"
+            : "Shop"}
         </h1>
 
         <p
@@ -81,13 +279,78 @@ export default function ShopClient({
         </p>
 
         <div className="mt-6">
-          <SearchBar value={search} onChange={setSearch} />
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+          />
         </div>
 
         <CategoryFilter
           selected={selectedCategory}
-          onChange={setSelectedCategory}
+          onChange={handleCategoryChange}
         />
+
+{availableSubcategories.length > 0 && (
+  <section className="mt-5">
+    <p
+      className={`mb-3 text-sm font-semibold text-slate-700 ${
+        language === "km"
+          ? "font-khmer leading-7"
+          : ""
+      }`}
+    >
+      {language === "km"
+        ? "ជ្រើសរើសតាមប្រភេទ"
+        : "Shop by Type"}
+    </p>
+
+    <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-2">
+      <button
+        type="button"
+        onClick={() => setSelectedSubcategory("")}
+        className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold backdrop-blur-2xl transition-all duration-300 ${
+          selectedSubcategory === ""
+            ? "border-gold/60 !bg-transparent text-gold shadow-none"
+            : "border-white/40 bg-white/15 text-slate-600 hover:border-white/60 hover:bg-white/30"
+        } ${
+          language === "km"
+            ? "font-khmer leading-6"
+            : ""
+        }`}
+      >
+        {language === "km"
+          ? "ទាំងអស់"
+          : "All Types"}
+      </button>
+
+      {availableSubcategories.map((option) => {
+        const active =
+          selectedSubcategory === option.value;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() =>
+              setSelectedSubcategory(option.value)
+            }
+            className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold backdrop-blur-2xl transition-all duration-300 ${
+              active
+                ? "border-gold/60 !bg-transparent text-gold shadow-none"
+                : "border-white/40 bg-white/15 text-slate-600 hover:border-white/60 hover:bg-white/30"
+            } ${
+              language === "km"
+                ? "font-khmer leading-6"
+                : ""
+            }`}
+          >
+            {option.label[language]}
+          </button>
+        );
+      })}
+    </div>
+  </section>
+)}
 
         {selectedBrand && (
           <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/60 bg-white/50 px-4 py-3 shadow-sm backdrop-blur-xl">
@@ -117,7 +380,9 @@ export default function ShopClient({
                   : ""
               }`}
             >
-              {language === "km" ? "សម្អាត" : "Clear"}
+              {language === "km"
+                ? "សម្អាត"
+                : "Clear"}
             </Link>
           </div>
         )}
@@ -157,8 +422,8 @@ export default function ShopClient({
                 }`}
               >
                 {language === "km"
-                  ? "សូមសាកល្បងស្វែងរក ប្រភេទ ឬម៉ាកផ្សេងទៀត"
-                  : "Try another search, category, or brand"}
+                  ? "សូមសាកល្បងជ្រើសរើសប្រភេទផ្សេងទៀត"
+                  : "Try another search, category, or product type"}
               </p>
             </div>
           )}
