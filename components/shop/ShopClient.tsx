@@ -293,7 +293,7 @@ export default function ShopClient({
 {availableSubcategories.length > 0 && (
   <section className="mt-5">
     <p
-      className={`mb-3 text-sm font-semibold text-slate-700 ${
+      className={`mb-2 text-[11px] font-semibold text-slate-600 ${
         language === "km"
           ? "font-khmer leading-7"
           : ""
