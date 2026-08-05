@@ -436,7 +436,7 @@ export default function PosPage() {
       <div className="flex h-full w-full flex-col overflow-hidden bg-white/20">
         {/* Banner */}
 
-        <section className="relative h-[250px] shrink-0 overflow-hidden bg-slate-900">
+        <section className="relative h-[180px] shrink-0 overflow-hidden bg-slate-900">
           {banners.map((banner, index) => (
             <img
               key={banner}

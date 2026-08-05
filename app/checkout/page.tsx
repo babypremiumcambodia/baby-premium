@@ -37,12 +37,7 @@ const paymentMethods = [
   },
 ];
 
-type LocationStatus =
-  | ""
-  | "unsupported"
-  | "success"
-  | "error";
-  
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { language } = useLanguage();

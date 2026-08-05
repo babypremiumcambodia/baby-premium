@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     console.error("Reward fulfillment error:", error);
 
     return NextResponse.json(
-      { error: "Failed to mark the gift as included." },
+      { error: "Failed to mark the gift as included" },
       { status: 500 }
     );
   }
