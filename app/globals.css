@@ -232,3 +232,23 @@ button.bg-gold:disabled {
 .font-khmer {
   font-family: "Kantumruy Pro", sans-serif;
 }
+
+/* POS scanned-product animation */
+
+@keyframes scanned-product-enter {
+  from {
+    width: 0;
+    opacity: 0;
+    transform: translateX(-24px) scale(0.94);
+  }
+
+  to {
+    width: 150px;
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.scanned-product-enter {
+  animation: scanned-product-enter 0.4s ease-out;
+}
