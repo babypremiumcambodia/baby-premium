@@ -1,14 +1,21 @@
 "use client";
 
 import { Languages } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "./LanguageProvider";
 
 export default function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
+  const pathname = usePathname();
+
+  // Hide the language selector only on the POS page
+  if (pathname.startsWith("/admin/pos")) {
+    return null;
+  }
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/45 p-1 shadow-[0_8px_25px_rgba(122,79,22,0.12)] backdrop-blur-2xl">
-      <Languages size={17} className="ml-2 text-[#b88932]" />
+    <div className="flex items-center gap-1 rounded-full border border-[#ead7b7] bg-white/90 p-1 shadow-sm backdrop-blur">
+      <Languages className="ml-2 h-4 w-4 text-[#b88932]" />
 
       <button
         type="button"
