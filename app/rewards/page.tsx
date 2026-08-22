@@ -91,7 +91,7 @@ if (!initData) {
   alert(
     language === "km"
       ? "សូមបើកកម្មវិធីនេះនៅក្នុង Telegram ដើម្បីប្តូរយកអំណោយ។"
-      : "Open this app inside Telegram to redeem a gift."
+      : "Open this app inside Telegram to redeem a gift"
   );
 
   return;
@@ -199,8 +199,8 @@ const response = await fetch("/api/rewards/redeem", {
         
           >
             {language === "km"
-              ? "សន្សំពិន្ទុរាល់ពេលដែលអ្នកទិញទំនិញជាមួយ Baby Premium"
-              : "Collect points every time you shop with Baby Premium+"}
+              ? "សន្សំពិន្ទុរាល់ពេលដែលអ្នកទិញទំនិញ"
+              : "Collect points every time you shop"}
           </p>
         </div>
 

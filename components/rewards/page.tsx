@@ -49,7 +49,7 @@ export default function RewardsPage() {
           <h1 className="text-4xl font-bold">Thank You Gifts</h1>
 
           <p className="mt-3 text-base text-gray-500">
-            Every purchase earns Love Points.
+            Every purchase earns Love Points
           </p>
 
           <p className="mt-1 text-base text-gray-500">
@@ -154,7 +154,7 @@ export default function RewardsPage() {
                 <h2 className="text-xl font-bold">No Gifts Available Yet</h2>
 
                 <p className="mt-2 text-gray-500">
-                  New thank you gifts will appear here soon.
+                  New thank you gifts will appear here soon
                 </p>
               </div>
             </GlassCard>

@@ -30,7 +30,7 @@ export default function HomeHeader() {
              >
               {language === "km"
                ? "បេប៊ី ព្រីមៀម"
-               : "Baby Premium"}
+               : "B. Premium & Essentials"}
               </p>
       </div>
 

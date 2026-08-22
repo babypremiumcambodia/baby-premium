@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Banknote,
+  Truck,
   LogOut,
   Minus,
   Plus,
@@ -52,6 +53,21 @@ type Member = {
   points: number;
 };
 
+type CustomerCart = {
+  id: number;
+  cart: CartItem[];
+  scannedProducts: ScannedProduct[];
+  selectedMember: Member | null;
+};
+
+const createCustomerCarts = (): CustomerCart[] =>
+  Array.from({ length: 9 }, (_, index) => ({
+    id: index + 1,
+    cart: [],
+    scannedProducts: [],
+    selectedMember: null,
+  }));
+
 const banners = [
   "/banners/banner-1.png",
   "/banners/banner-2.png",
@@ -66,7 +82,7 @@ const defaultBackground: PosBackground = {
   y: 50,
 };
 
-const KHR_RATE = 4100;
+const KHR_RATE = 4050;
 
 type KhqrState = "idle" | "generating" | "waiting" | "paid" | "error";
 
@@ -99,7 +115,27 @@ export default function PosPage() {
   const [scannedProducts, setScannedProducts] = useState<ScannedProduct[]>([]);
 
   const [search, setSearch] = useState("");
+  const [showProductSearch, setShowProductSearch] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(0);
+
+  // TEST: automatically rotate the POS glass theme every 10 seconds.
+  // Later change 10 * 1000 to 60 * 60 * 1000 for one hour.
+  const posThemes = [
+    { name: "Emerald", from: "rgba(4,120,87,0.78)", to: "rgba(52,211,153,0.62)", softFrom: "rgba(4,120,87,0.22)", softTo: "rgba(52,211,153,0.28)" },
+    { name: "Sapphire", from: "rgba(29,78,216,0.78)", to: "rgba(56,189,248,0.62)", softFrom: "rgba(29,78,216,0.22)", softTo: "rgba(56,189,248,0.28)" },
+    { name: "Violet", from: "rgba(109,40,217,0.78)", to: "rgba(192,132,252,0.62)", softFrom: "rgba(109,40,217,0.22)", softTo: "rgba(192,132,252,0.28)" },
+    { name: "Ruby", from: "rgba(159,18,57,0.78)", to: "rgba(251,113,133,0.62)", softFrom: "rgba(159,18,57,0.22)", softTo: "rgba(251,113,133,0.28)" },
+    { name: "Gold", from: "rgba(161,98,7,0.78)", to: "rgba(251,191,36,0.62)", softFrom: "rgba(161,98,7,0.22)", softTo: "rgba(251,191,36,0.28)" },
+  ];
+  const [themeIndex, setThemeIndex] = useState(0);
+  const currentTheme = posThemes[themeIndex];
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setThemeIndex((current) => (current + 1) % posThemes.length);
+    }, 10 * 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const [showBackgroundSettings, setShowBackgroundSettings] = useState(false);
 
@@ -112,6 +148,15 @@ export default function PosPage() {
   const [receivedUSD, setReceivedUSD] = useState("");
   const [receivedKHR, setReceivedKHR] = useState("");
 
+  // F12 special-sale mode: arm before scanning, then edit the next scanned item
+  const [specialSaleMode, setSpecialSaleMode] = useState(false);
+  const [showSaleEdit, setShowSaleEdit] = useState(false);
+  const [lastScannedProductId, setLastScannedProductId] = useState<number | null>(null);
+  const [saleEditProductId, setSaleEditProductId] = useState<number | null>(null);
+  const [saleEditQty, setSaleEditQty] = useState("1");
+  const [saleEditPrice, setSaleEditPrice] = useState("0");
+  const [saleEditDiscount, setSaleEditDiscount] = useState("0");
+
   const [showKhqrPayment, setShowKhqrPayment] = useState(false);
   const [khqrState, setKhqrState] = useState<KhqrState>("idle");
   const [khqrTranId, setKhqrTranId] = useState("");
@@ -122,11 +167,28 @@ export default function PosPage() {
   const [khqrBankName, setKhqrBankName] = useState("");
 
   const [showMemberModal, setShowMemberModal] = useState(false);
+
+  // Delivery details for the current customer sale only.
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [isDelivery, setIsDelivery] = useState(false);
+  const [deliveryName, setDeliveryName] = useState("");
+  const [deliveryPhone, setDeliveryPhone] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryFee, setDeliveryFee] = useState("1.50");
+  const [deliveryNote, setDeliveryNote] = useState("");
   const [memberSearch, setMemberSearch] = useState("");
   const [memberResults, setMemberResults] = useState<Member[]>([]);
   const [memberLoading, setMemberLoading] = useState(false);
   const [memberError, setMemberError] = useState("");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+
+  // F4 multi-cart: up to 9 customers can be kept at the same time.
+  const [customerCarts, setCustomerCarts] = useState<CustomerCart[]>(
+    createCustomerCarts,
+  );
+  const [activeCartIndex, setActiveCartIndex] = useState(0);
+  const [showCartSwitcher, setShowCartSwitcher] = useState(false);
+
   const [showNewMemberForm, setShowNewMemberForm] = useState(false);
   const [newMemberName, setNewMemberName] = useState("");
   const [newMemberPhone, setNewMemberPhone] = useState("");
@@ -191,6 +253,171 @@ export default function PosPage() {
 
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    function handlePosNavigationShortcuts(event: KeyboardEvent) {
+      if (event.key === "F3") {
+        event.preventDefault();
+
+        if (
+          !showCashPayment &&
+          !showKhqrPayment &&
+          !showCartSwitcher &&
+          !showSaleEdit &&
+          !showMemberModal &&
+          !showBackgroundSettings
+        ) {
+          setShowProductSearch(true);
+          setSearch("");
+        }
+        return;
+      }
+
+      if (event.key === "F4") {
+        event.preventDefault();
+
+        if (
+          !showCashPayment &&
+          !showKhqrPayment &&
+          !showProductSearch &&
+          !showSaleEdit &&
+          !showMemberModal &&
+          !showBackgroundSettings
+        ) {
+          setShowCartSwitcher(true);
+        }
+        return;
+      }
+
+      if (event.key === "Escape" && showProductSearch) {
+        event.preventDefault();
+        setShowProductSearch(false);
+        setSearch("");
+        return;
+      }
+
+      if (event.key === "Escape" && showCartSwitcher) {
+        event.preventDefault();
+        setShowCartSwitcher(false);
+      }
+    }
+
+    window.addEventListener("keydown", handlePosNavigationShortcuts);
+
+    return () => {
+      window.removeEventListener("keydown", handlePosNavigationShortcuts);
+    };
+  }, [
+    showProductSearch,
+    showCartSwitcher,
+    showCashPayment,
+    showKhqrPayment,
+    showSaleEdit,
+    showMemberModal,
+    showBackgroundSettings,
+  ]);
+
+  useEffect(() => {
+    function handleSaleShortcuts(event: KeyboardEvent) {
+      if (event.key === "F12") {
+        event.preventDefault();
+
+        if (
+          !showCashPayment &&
+          !showKhqrPayment &&
+          !showProductSearch &&
+          !showCartSwitcher &&
+          !showSaleEdit &&
+          !showMemberModal &&
+          !showBackgroundSettings
+        ) {
+          setSpecialSaleMode((current) => !current);
+        }
+        return;
+      }
+
+      if (event.key === "F10") {
+        event.preventDefault();
+
+        if (
+          !showCashPayment &&
+          !showKhqrPayment &&
+          !showProductSearch &&
+          !showCartSwitcher &&
+          !showSaleEdit &&
+          !showMemberModal &&
+          !showBackgroundSettings &&
+          cart.length > 0
+        ) {
+          clearSale();
+        }
+        return;
+      }
+
+      if (event.key === "Escape" && showSaleEdit) {
+        event.preventDefault();
+        closeSaleEdit();
+      }
+    }
+
+    window.addEventListener("keydown", handleSaleShortcuts);
+
+    return () => {
+      window.removeEventListener("keydown", handleSaleShortcuts);
+    };
+  }, [
+    cart.length,
+    showSaleEdit,
+    showCashPayment,
+    showKhqrPayment,
+    showProductSearch,
+    showCartSwitcher,
+    showMemberModal,
+    showBackgroundSettings,
+  ]);
+
+  useEffect(() => {
+    function handleEnterToCash(event: KeyboardEvent) {
+      if (event.key !== "Enter") return;
+
+      const target = event.target as HTMLElement | null;
+      const isTyping =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable;
+
+      if (isTyping) return;
+
+      if (
+        cart.length > 0 &&
+        !showCashPayment &&
+        !showKhqrPayment &&
+        !showProductSearch &&
+        !showCartSwitcher &&
+        !showSaleEdit &&
+        !showMemberModal &&
+        !showBackgroundSettings
+      ) {
+        event.preventDefault();
+        openCashPayment();
+      }
+    }
+
+    window.addEventListener("keydown", handleEnterToCash);
+
+    return () => {
+      window.removeEventListener("keydown", handleEnterToCash);
+    };
+  }, [
+    cart.length,
+    showCashPayment,
+    showKhqrPayment,
+    showProductSearch,
+    showCartSwitcher,
+    showMemberModal,
+    showBackgroundSettings,
+  ]);
 
   useEffect(() => {
     const savedSettings = localStorage.getItem("baby-premium-pos-background");
@@ -262,16 +489,19 @@ export default function PosPage() {
           barcode.includes(searchText)
         );
       })
-      .slice(0, 10);
+      .slice(0, 50);
   }, [products, search]);
 
   const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
-  const subtotal = cart.reduce(
+  const productSubtotal = cart.reduce(
     (total, item) =>
       total + item.price * item.quantity * (1 - (item.discount ?? 0) / 100),
     0,
   );
+
+  const deliveryFeeNumber = isDelivery ? Math.max(0, Number(deliveryFee) || 0) : 0;
+  const subtotal = productSubtotal + deliveryFeeNumber;
 
   const totalKHR = Math.round(subtotal * KHR_RATE);
   const receivedUSDNumber = Number(receivedUSD) || 0;
@@ -340,6 +570,15 @@ export default function PosPage() {
     });
 
     recordScannedProduct(product);
+    setLastScannedProductId(product.id);
+  }
+
+  function addScannedProduct(product: Product) {
+    addToCart(product);
+
+    if (specialSaleMode && product.stock > 0) {
+      openSaleEditForProduct(product);
+    }
   }
 
   function increaseQuantity(item: CartItem) {
@@ -401,7 +640,67 @@ export default function PosPage() {
     );
   }
 
+  function getCartSnapshot(index: number): CustomerCart {
+    if (index === activeCartIndex) {
+      return {
+        id: index + 1,
+        cart,
+        scannedProducts,
+        selectedMember,
+      };
+    }
+
+    return customerCarts[index];
+  }
+
+  function switchCustomerCart(index: number) {
+    if (index < 0 || index >= customerCarts.length) return;
+
+    if (index === activeCartIndex) {
+      setShowCartSwitcher(false);
+      return;
+    }
+
+    const nextCart = customerCarts[index];
+
+    setCustomerCarts((current) =>
+      current.map((slot, slotIndex) =>
+        slotIndex === activeCartIndex
+          ? {
+              ...slot,
+              cart,
+              scannedProducts,
+              selectedMember,
+            }
+          : slot,
+      ),
+    );
+
+    setActiveCartIndex(index);
+    setCart(nextCart.cart);
+    setScannedProducts(nextCart.scannedProducts);
+    setSelectedMember(nextCart.selectedMember);
+    setSearch("");
+    setSpecialSaleMode(false);
+    setShowSaleEdit(false);
+    setSaleEditProductId(null);
+    setShowCartSwitcher(false);
+  }
+
   function clearSale() {
+    setCustomerCarts((current) =>
+      current.map((slot, index) =>
+        index === activeCartIndex
+          ? {
+              ...slot,
+              cart: [],
+              scannedProducts: [],
+              selectedMember: null,
+            }
+          : slot,
+      ),
+    );
+
     setCart([]);
     setScannedProducts([]);
     setSearch("");
@@ -418,13 +717,100 @@ export default function PosPage() {
     setKhqrBankName("");
     setSelectedMember(null);
     setShowMemberModal(false);
+    setShowDeliveryModal(false);
+    setIsDelivery(false);
+    setDeliveryName("");
+    setDeliveryPhone("");
+    setDeliveryAddress("");
+    setDeliveryFee("1.50");
+    setDeliveryNote("");
     setMemberSearch("");
     setMemberResults([]);
     setMemberError("");
     setShowNewMemberForm(false);
     setNewMemberName("");
     setNewMemberPhone("");
+    setSpecialSaleMode(false);
+    setShowSaleEdit(false);
+    setLastScannedProductId(null);
+    setSaleEditProductId(null);
+    setSaleEditQty("1");
+    setSaleEditPrice("0");
+    setSaleEditDiscount("0");
     khqrCompletedRef.current = false;
+  }
+
+  function openSaleEditForProduct(product: Product) {
+    // Wait until React has added/updated the cart item, then open the editor.
+    window.setTimeout(() => {
+      setSaleEditProductId(product.id);
+      setSaleEditQty("1");
+      setSaleEditPrice(product.price.toFixed(2));
+      setSaleEditDiscount("0");
+      setShowSaleEdit(true);
+      setSpecialSaleMode(false);
+    }, 0);
+  }
+
+  function closeSaleEdit() {
+    setShowSaleEdit(false);
+    setSaleEditProductId(null);
+  }
+
+  function saveSaleEdit() {
+    if (saleEditProductId === null) return;
+
+    const currentItem = cart.find((item) => item.id === saleEditProductId);
+    if (!currentItem) {
+      closeSaleEdit();
+      return;
+    }
+
+    const quantity = Math.min(
+      currentItem.stock,
+      Math.max(1, Math.floor(Number(saleEditQty) || 1)),
+    );
+    const price = Math.max(0, Number(saleEditPrice) || 0);
+    const discount = Math.min(100, Math.max(0, Number(saleEditDiscount) || 0));
+
+    setCart((current) =>
+      current.map((item) =>
+        item.id === saleEditProductId
+          ? {
+              ...item,
+              quantity,
+              price,
+              discount,
+            }
+          : item,
+      ),
+    );
+
+    closeSaleEdit();
+  }
+
+  function openDeliveryModal() {
+    if (cart.length === 0) return;
+    setShowDeliveryModal(true);
+  }
+
+  function closeDeliveryModal() {
+    setShowDeliveryModal(false);
+  }
+
+  function saveDelivery() {
+    setIsDelivery(true);
+    setShowDeliveryModal(false);
+  }
+
+  function removeDelivery() {
+    setIsDelivery(false);
+    setDeliveryName("");
+    setDeliveryPhone("");
+    setDeliveryAddress("");
+    setDeliveryFee("1.50");
+    setDeliveryNote("");
+    setShowDeliveryModal(false);
   }
 
   function openMemberModal() {
@@ -669,7 +1055,7 @@ export default function PosPage() {
     );
 
     if (exactBarcodeProduct) {
-      addToCart(exactBarcodeProduct);
+      addScannedProduct(exactBarcodeProduct);
       setSearch("");
       return;
     }
@@ -679,13 +1065,13 @@ export default function PosPage() {
     );
 
     if (exactNameProduct) {
-      addToCart(exactNameProduct);
+      addScannedProduct(exactNameProduct);
       setSearch("");
       return;
     }
 
     if (filteredProducts.length === 1) {
-      addToCart(filteredProducts[0]);
+      addScannedProduct(filteredProducts[0]);
       setSearch("");
       return;
     }
@@ -788,7 +1174,7 @@ export default function PosPage() {
 
         <section className="relative h-[190px] shrink-0 overflow-visible">
           {/* BannerSlider clipped inside the frame */}
-          <div className="absolute inset-x-0 top-0 h-[179px] overflow-hidden bg-slate-900">
+          <div className="absolute inset-x-0 top-0 h-full overflow-hidden bg-slate-900">
             {banners.map((banner, index) => (
               <img
                 key={banner}
@@ -807,13 +1193,7 @@ export default function PosPage() {
             {/* Brand content */}
             <div className="absolute inset-0 z-20 flex items-center px-10">
               <div className="flex items-center gap-5">
-                <div className="flex h-[108px] w-[108px] shrink-0 items-center justify-center overflow-hidden rounded-[28px] border border-white/70 bg-white/90 p-3 shadow-[0_14px_32px_rgba(15,23,42,0.22)] backdrop-blur-xl">
-                  <img
-                    src="/logo/baby-premium.png"
-                    alt="Baby Premium"
-                    className="h-full w-full object-contain"
-                  />
-                </div>
+                
 
                 <div className="text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.35)]">
                   <p className="font-khmer text-base leading-7 text-white/80">
@@ -840,7 +1220,7 @@ export default function PosPage() {
           </div>
 
           {/* Soft transparent gold frame / curve */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-[28px] overflow-visible">
+          <div className="pointer-events-none absolute inset-x-0 -bottom-[16px] z-40 h-[37px] overflow-visible">
             <svg
               className="h-full w-full translate-y-[2px] overflow-visible"
               viewBox="0 0 1440 38"
@@ -900,7 +1280,7 @@ export default function PosPage() {
             posBackground.url
               ? {
                   backgroundImage: `linear-gradient(rgba(255,250,240,0.12), rgba(255,250,240,0.12)), url("${posBackground.url}")`,
-                  backgroundSize: `auto ${posBackground.size}%`,
+                  backgroundSize: `100% 100%`,
                   backgroundPosition: `${posBackground.x}% ${posBackground.y}%`,
                 }
               : undefined
@@ -934,69 +1314,7 @@ export default function PosPage() {
   )}
 </div>
 
-          {/* Barcode search */}
-
-          <div className="relative z-40 flex w-[430px] shrink-0 items-start border-l border-white/40 bg-transparent px-5 pt-3">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="flex w-full items-center rounded-[20px] border border-white/60 bg-white/15 px-4 shadow-sm backdrop-blur-md"
-            >
-              <Search className="h-5 w-5 shrink-0 text-gold" />
-
-              <input
-                autoFocus
-                type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Barcode or product name…"
-                className="min-w-0 flex-1 bg-transparent px-3 py-3.5 text-sm outline-none placeholder:text-slate-500"
-              />
-
-              <ScanBarcode className="h-6 w-6 shrink-0 text-gray-500" />
-            </form>
-
-            {search.trim() && filteredProducts.length > 0 && (
-              <div className="absolute right-4 top-[70px] z-[100] max-h-[320px] w-[420px] overflow-y-auto rounded-[22px] border border-white/80 bg-[#fffaf0]/95 p-2 shadow-2xl backdrop-blur-2xl">
-                {filteredProducts.map((product) => (
-                  <button
-                    key={product.id}
-                    type="button"
-                    onClick={() => {
-                      addToCart(product);
-                      setSearch("");
-                    }}
-                    className="flex w-full items-center gap-3 rounded-[16px] p-3 text-left transition hover:bg-white/80"
-                  >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="h-full w-full object-contain p-1"
-                        />
-                      ) : (
-                        <ScanBarcode className="h-5 w-5 text-gray-300" />
-                      )}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">
-                        {product.name}
-                      </p>
-
-                      <p className="mt-1 truncate text-[10px] text-gray-500">
-                        {product.barcode || `P-${product.id}`}
-                      </p>
-                    </div>
-
-                    <p className="shrink-0 font-bold text-gold">
-                      ${product.price.toFixed(2)}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Barcode search is hidden on the main POS. Press F3 to open Product Search. */}
 
           <button
             type="button"
@@ -1008,14 +1326,14 @@ export default function PosPage() {
             <Settings className="h-4 w-4" />
           </button>
         </section>
-        <div className="relative z-40 h-[20px] shrink-0 border-y border-emerald-200/60 bg-[linear-gradient(135deg,rgba(4,120,87,0.22),rgba(52,211,153,0.28))] shadow-[0_5px_16px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.70)] backdrop-blur-[24px] backdrop-saturate-[180%]" />
+        <div className="relative z-40 h-[20px] shrink-0 border-y border-emerald-200/60 bg-transparent shadow-[0_5px_16px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.70)] backdrop-blur-[24px] backdrop-saturate-[180%]" style={{ background: `linear-gradient(135deg, ${currentTheme.softFrom}, ${currentTheme.softTo})` }} />
 
         {/* Sale table */}
 
 <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white/45">
   {/* Table header */}
 
-  <div className="grid shrink-0 grid-cols-[180px_2fr_2fr_90px_110px_100px_120px_50px] divide-x divide-white/30 border-y border-emerald-200/60 bg-[linear-gradient(135deg,rgba(4,120,87,0.78),rgba(52,211,153,0.62))] px-5 py-3 text-white shadow-[0_8px_24px_rgba(5,150,105,0.20),inset_0_1px_2px_rgba(255,255,255,0.65)] backdrop-blur-[24px] backdrop-saturate-[180%]">
+  <div className="grid shrink-0 grid-cols-[180px_2fr_2fr_90px_110px_100px_120px_50px] divide-x divide-white/30 border-y border-emerald-200/60 bg-transparent px-5 py-3 text-white shadow-[0_8px_24px_rgba(5,150,105,0.20),inset_0_1px_2px_rgba(255,255,255,0.65)] backdrop-blur-[24px] backdrop-saturate-[180%]" style={{ background: `linear-gradient(135deg, ${currentTheme.from}, ${currentTheme.to})` }}>
     {/* Barcode */}
 
     <div className="flex flex-col justify-center gap-0 px-0">
@@ -1100,7 +1418,7 @@ export default function PosPage() {
       </p>
     </div>
 
-    {/* Delete column */}
+    {/* /ete column */}
 
     <div />
   </div>
@@ -1108,21 +1426,7 @@ export default function PosPage() {
   {/* Product rows */}
 
   <div className="min-h-0 flex-1 overflow-y-auto">
-    {cart.length === 0 ? (
-      <div className="flex h-full items-center justify-center text-gray-400">
-        <div className="text-center">
-          <ScanBarcode className="mx-auto h-10 w-10" />
-
-          <p className="mt-3 font-semibold">
-            Scan a product to begin
-          </p>
-
-          <p className="font-khmer mt-1 text-sm leading-7">
-            ស្កេនទំនិញដើម្បីចាប់ផ្តើម
-          </p>
-        </div>
-      </div>
-    ) : (
+    {cart.length === 0 ? null : (
       cart.map((item) => {
         const discountedAmount =
           item.price *
@@ -1165,29 +1469,26 @@ export default function PosPage() {
             </div>
 
             {/* Discount */}
+<div className="flex items-center justify-center">
+  <input
+    type="number"
+    min="0"
+    max="100"
+    step="1"
+    value={item.discount ?? 0}
+    onChange={(event) =>
+      updateDiscount(
+        item.id,
+        Number(event.target.value)
+      )
+    }
+    className="w-[48px] bg-transparent text-right text-[13px] font-bold text-slate-700 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+  />
 
-            <div className="flex items-center justify-center px-1">
-              <div className="flex w-[76px] items-center rounded-full border border-white/80 bg-white/55 px-2 shadow-sm backdrop-blur-xl">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={item.discount ?? 0}
-                  onChange={(event) =>
-                    updateDiscount(
-                      item.id,
-                      Number(event.target.value)
-                    )
-                  }
-                  className="min-w-0 flex-1 bg-transparent py-2 text-center text-xs font-bold outline-none"
-                />
-
-                <span className="text-[15px] font-semibold text-gray-500">
-                  %
-                </span>
-              </div>
-            </div>
+  <span className="ml-1 text-[11px] font-semibold text-emerald-600">
+    %
+  </span>
+</div>
 
             {/* Quantity */}
 
@@ -1247,12 +1548,76 @@ export default function PosPage() {
         );
       })
     )}
+
+    {isDelivery && (
+      <div className="grid grid-cols-[180px_2fr_2fr_90px_110px_100px_120px_50px] items-center divide-x divide-slate-300/60 border-x border-b border-slate-300/60 bg-white/20 px-5 py-3 text-[12px]">
+        {/* Delivery code */}
+        <div className="min-w-0 pr-2">
+          <p className="truncate font-mono text-xs font-bold text-emerald-600">
+            DELIVERY
+          </p>
+        </div>
+
+        {/* Delivery description */}
+        <div className="min-w-0 px-2">
+          <p className="truncate text-[13px] font-semibold text-slate-900">
+            Delivery
+          </p>
+          {(deliveryName || deliveryPhone) && (
+            <p className="mt-1 truncate text-[11px] text-gray-500">
+              {[deliveryName, deliveryPhone].filter(Boolean).join(" · ")}
+            </p>
+          )}
+        </div>
+
+        {/* Delivery details */}
+        <div className="min-w-0 px-2">
+          <p className="line-clamp-2 text-[12px] leading-5 text-gray-500">
+            {deliveryAddress || deliveryNote || "Delivery service"}
+          </p>
+        </div>
+
+        {/* Discount */}
+        <div className="flex items-center justify-center text-[13px] font-bold text-slate-400">
+          —
+        </div>
+
+        {/* Quantity */}
+        <div className="flex items-center justify-center text-sm font-bold">
+          1
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center justify-center px-1 text-center">
+          <p className="font-semibold">${deliveryFeeNumber.toFixed(2)}</p>
+        </div>
+
+        {/* Amount */}
+        <div className="flex items-center justify-center px-1 text-center">
+          <p className="text-base font-bold text-gold">
+            ${deliveryFeeNumber.toFixed(2)}
+          </p>
+        </div>
+
+        {/* Delete delivery */}
+        <div className="flex items-center justify-center">
+          <button
+            type="button"
+            onClick={removeDelivery}
+            aria-label="Remove delivery"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    )}
   </div>
 </section>
 
         {/* Total and payment */}
         <div className="h-[110px] shrink-0">
-        <footer className="flex h-[90px] items-center justify-between border-y border-emerald-200/60 bg-[linear-gradient(135deg,rgba(4,120,87,0.78),rgba(52,211,153,0.62))] px-8 text-white shadow-[0_8px_24px_rgba(5,150,105,0.20),inset_0_1px_2px_rgba(255,255,255,0.65)] backdrop-blur-[24px] backdrop-saturate-[180%]">
+        <footer className="flex h-[90px] items-center justify-between border-y border-emerald-200/60 bg-transparent px-8 text-white shadow-[0_8px_24px_rgba(5,150,105,0.20),inset_0_1px_2px_rgba(255,255,255,0.65)] backdrop-blur-[24px] backdrop-saturate-[180%]" style={{ background: `linear-gradient(135deg, ${currentTheme.from}, ${currentTheme.to})` }}>
           {/* Payment buttons — left */}
 
           <div className="flex items-center gap-3">
@@ -1278,6 +1643,20 @@ export default function PosPage() {
 
             <button
               type="button"
+              disabled={cart.length === 0}
+              onClick={openDeliveryModal}
+              className={`flex items-center gap-2 rounded-full border px-5 py-3 font-semibold transition disabled:opacity-40 ${
+                isDelivery
+                  ? "border-white/50 bg-white/25 text-white"
+                  : "border-white/20 bg-white/10 text-white"
+              }`}
+            >
+              <Truck className="h-5 w-5" />
+              Delivery
+            </button>
+
+            <button
+              type="button"
               onClick={openMemberModal}
               className={`flex items-center gap-2 rounded-full border px-5 py-3 font-semibold transition ${
                 selectedMember
@@ -1286,7 +1665,7 @@ export default function PosPage() {
               }`}
             >
               <UserRound className="h-5 w-5" />
-              {selectedMember ? selectedMember.name : "Member"}
+              Member
               {selectedMember && (
                 <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
                   {selectedMember.points.toLocaleString()} pts
@@ -1308,11 +1687,11 @@ export default function PosPage() {
 
           <div className="flex items-center gap-8">
             <div className="text-right">
-              <p className="font-khmer text-xs leading-5 text-white/60">
+              <p className="font-khmer text-xs leading-5 text-white">
                 ចំនួនសរុប
               </p>
 
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white">
                 Qty
               </p>
 
@@ -1322,11 +1701,11 @@ export default function PosPage() {
             <div className="h-14 w-px bg-white/20" />
 
             <div className="min-w-[180px] text-right">
-              <p className="font-khmer text-xs leading-5 text-white/60">
+              <p className="font-khmer text-xs leading-5 text-white">
                 តម្លៃសរុប
               </p>
 
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white">
                 Total
               </p>
 
@@ -1338,11 +1717,474 @@ export default function PosPage() {
         </footer>
 
         {/* Mini glass — bottom of Total and payment */}
-        <div className="relative z-40 h-[20px] border-y border-emerald-200/60 bg-[linear-gradient(135deg,rgba(4,120,87,0.22),rgba(52,211,153,0.28))] shadow-[0_5px_16px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.70)] backdrop-blur-[24px] backdrop-saturate-[180%]" />
+        <div className="relative z-40 h-[20px] border-y border-emerald-200/60 bg-transparent shadow-[0_5px_16px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.70)] backdrop-blur-[24px] backdrop-saturate-[180%]" style={{ background: `linear-gradient(135deg, ${currentTheme.softFrom}, ${currentTheme.softTo})` }} />
         </div>
       </div>
 
-      {/* Member */}
+{/* F12 Special Sale status */}
+{specialSaleMode && !showSaleEdit && (
+  <div className="fixed right-3 top-3 z-[310] rounded-full border border-white/25 bg-white/[0.08] px-5 py-3 text-sm font-black text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.55),0_6px_20px_rgba(15,23,42,0.04)] backdrop-blur-[20px] backdrop-saturate-[180%]">
+    F12 SPECIAL MODE ON
+  </div>
+)}
+
+{/* F12 Special Sale — edit the next scanned item for this sale only */}
+{showSaleEdit && saleEditProductId !== null && (
+  <div
+    className="fixed inset-0 z-[320] flex items-center justify-center bg-slate-950/25 p-6 backdrop-blur-[3px]"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) closeSaleEdit();
+    }}
+  >
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        saveSaleEdit();
+      }}
+      className="w-full max-w-[520px] overflow-hidden rounded-[30px] border border-white/80 bg-[#fffaf0]/95 shadow-[0_30px_90px_rgba(15,23,42,0.30)] backdrop-blur-[30px]"
+    >
+      <div className="flex items-center justify-between border-b border-emerald-200/60 bg-[linear-gradient(135deg,rgba(4,120,87,0.90),rgba(52,211,153,0.72))] px-7 py-5 text-white">
+        <div>
+          <p className="font-khmer text-sm text-white/75">កែសម្រួលការលក់</p>
+          <h2 className="mt-1 text-2xl font-bold">Edit Sale Item</h2>
+        </div>
+
+        <button
+          type="button"
+          onClick={closeSaleEdit}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/15 transition hover:bg-white/25"
+          aria-label="Close sale item edit"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="p-7">
+        {(() => {
+          const item = cart.find((cartItem) => cartItem.id === saleEditProductId);
+          if (!item) return null;
+
+          return (
+            <>
+              <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/55 px-5 py-4">
+                <p className="truncate text-lg font-bold text-slate-800">{item.name}</p>
+                <p className="mt-1 font-mono text-xs text-slate-400">
+                  {item.barcode || `P-${item.id}`}
+                </p>
+                <p className="mt-1 text-xs font-semibold text-slate-400">
+                  Available stock: {item.stock}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.10em] text-slate-500">
+                    Qty
+                  </label>
+                  <input
+                    autoFocus
+                    type="number"
+                    min="1"
+                    max={item.stock}
+                    step="1"
+                    value={saleEditQty}
+                    onChange={(event) => setSaleEditQty(event.target.value)}
+                    className="h-[58px] w-full rounded-2xl border-2 border-emerald-200 bg-white px-4 text-center text-xl font-black text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.10em] text-slate-500">
+                    Price
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={saleEditPrice}
+                      onChange={(event) => setSaleEditPrice(event.target.value)}
+                      className="h-[58px] w-full rounded-2xl border-2 border-emerald-200 bg-white px-4 pr-9 text-right text-xl font-black text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    />
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">$</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-xs font-bold uppercase tracking-[0.10em] text-slate-500">
+                    Discount
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={saleEditDiscount}
+                      onChange={(event) => setSaleEditDiscount(event.target.value)}
+                      className="h-[58px] w-full rounded-2xl border-2 border-emerald-200 bg-white px-4 pr-9 text-right text-xl font-black text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    />
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-[130px_1fr] gap-3">
+                <button
+                  type="button"
+                  onClick={closeSaleEdit}
+                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3.5 font-bold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="rounded-2xl bg-emerald-600 px-5 py-3.5 text-lg font-bold text-white shadow-md transition hover:bg-emerald-700"
+                >
+                  Save Changes
+                </button>
+              </div>
+
+              <p className="mt-3 text-center text-xs text-slate-400">
+                F12 Special Sale · Enter save · Esc close · This sale only
+              </p>
+            </>
+          );
+        })()}
+      </div>
+    </form>
+  </div>
+)}
+
+{/* F4 Multi-Cart — 9 customer carts */}
+{showCartSwitcher && (
+  <div
+    className="fixed inset-0 z-[310] flex items-center justify-center bg-slate-950/25 p-6 backdrop-blur-[3px]"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) {
+        setShowCartSwitcher(false);
+      }
+    }}
+  >
+    <div className="w-full max-w-[900px] overflow-hidden rounded-[30px] border border-white/80 bg-[#fffaf0]/95 shadow-[0_30px_90px_rgba(15,23,42,0.30)] backdrop-blur-[30px]">
+      <div
+        className="flex items-center justify-between border-b border-white/40 px-7 py-5 text-white"
+        style={{
+          backgroundImage: `linear-gradient(135deg, ${currentTheme.from}, ${currentTheme.to})`,
+        }}
+      >
+        <div>
+          <p className="font-khmer text-sm text-white/80">កន្ត្រកអតិថិជន</p>
+          <h2 className="mt-1 text-2xl font-bold">Customer Carts</h2>
+          <p className="mt-1 text-xs font-semibold text-white/75">
+            F4 · Keep up to 9 customers at the same time
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowCartSwitcher(false)}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/15 transition hover:bg-white/25"
+          aria-label="Close carts"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 p-6">
+        {customerCarts.map((slot, index) => {
+          const snapshot = getCartSnapshot(index);
+          const slotItemCount = snapshot.cart.reduce(
+            (total, item) => total + item.quantity,
+            0,
+          );
+          const slotTotal = snapshot.cart.reduce(
+            (total, item) =>
+              total +
+              item.price *
+                item.quantity *
+                (1 - (item.discount ?? 0) / 100),
+            0,
+          );
+          const isActive = index === activeCartIndex;
+          const isEmpty = snapshot.cart.length === 0;
+
+          return (
+            <button
+              key={slot.id}
+              type="button"
+              onClick={() => switchCustomerCart(index)}
+              className={`relative min-h-[150px] rounded-[24px] border p-5 text-left transition ${
+                isActive
+                  ? "border-[#d2ad55] bg-white shadow-[0_14px_34px_rgba(184,137,50,0.18)] ring-2 ring-[#d2ad55]/30"
+                  : isEmpty
+                    ? "border-slate-200/80 bg-white/45 hover:border-emerald-200 hover:bg-white/70"
+                    : "border-emerald-200/80 bg-white/75 shadow-sm hover:border-emerald-300"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                    Cart {slot.id}
+                  </p>
+                  <p className="mt-2 text-xl font-black text-slate-800">
+                    {isEmpty ? "Empty" : `${slotItemCount} item${slotItemCount === 1 ? "" : "s"}`}
+                  </p>
+                </div>
+
+                {isActive && (
+                  <span className="rounded-full bg-[#b88932]/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#9a6a13]">
+                    Current
+                  </span>
+                )}
+              </div>
+
+              {!isEmpty && (
+                <>
+                  <p className="mt-4 text-2xl font-black text-[#b3263e]">
+                    ${slotTotal.toFixed(2)}
+                  </p>
+                  <p className="mt-2 truncate text-xs font-semibold text-slate-500">
+                    {snapshot.selectedMember
+                      ? snapshot.selectedMember.name
+                      : "Walk-in customer"}
+                  </p>
+                </>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="border-t border-slate-200/70 bg-white/55 px-6 py-4 text-center text-xs font-semibold text-slate-400">
+        F3 Search · F4 Carts · F10 Clear Current Cart · F12 Special Sale · Esc Close
+      </div>
+    </div>
+  </div>
+)}
+
+{/* F3 Product Search */}
+{showProductSearch && (
+  <div
+    className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/25 p-6 backdrop-blur-[3px]"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) {
+        setShowProductSearch(false);
+        setSearch("");
+      }
+    }}
+  >
+    <div className="flex h-[620px] w-full max-w-[1050px] flex-col overflow-hidden rounded-[30px] border border-white/80 bg-[#fffaf0]/95 shadow-[0_30px_90px_rgba(15,23,42,0.30)] backdrop-blur-[30px]">
+
+      {/* Header */}
+      <div className="flex shrink-0 items-center justify-between border-b border-emerald-200/60 bg-[linear-gradient(135deg,rgba(4,120,87,0.92),rgba(52,211,153,0.78))] px-8 py-5 text-white">
+        <div>
+          <p className="font-khmer text-sm text-white/75">
+            ស្វែងរកទំនិញ
+          </p>
+
+          <h2 className="text-2xl font-bold">
+            Product Search
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowProductSearch(false);
+            setSearch("");
+          }}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/15 transition hover:bg-white/25"
+          aria-label="Close product search"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Search */}
+      <div className="shrink-0 border-b border-slate-200/70 bg-white/65 px-8 py-5">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="mx-auto flex max-w-[900px] items-center rounded-[22px] border border-emerald-200/80 bg-white/80 px-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl"
+        >
+          <Search className="h-6 w-6 shrink-0 text-emerald-600" />
+
+          <input
+            autoFocus
+            type="text"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Barcode, product name or brand..."
+            className="min-w-0 flex-1 bg-transparent px-4 py-4 text-base outline-none placeholder:text-slate-400"
+          />
+
+          <ScanBarcode className="h-6 w-6 shrink-0 text-slate-400" />
+        </form>
+
+        <p className="mx-auto mt-2 max-w-[900px] text-xs text-slate-400">
+          F3 Product Search · ESC Close
+        </p>
+      </div>
+
+      {/* Product list */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-8 py-6">
+        <div className="mx-auto max-w-[980px]">
+          {!search.trim() ? (
+            <div className="flex min-h-[320px] items-center justify-center">
+              <div className="text-center text-slate-400">
+                <Search className="mx-auto h-12 w-12" />
+
+                <p className="mt-4 text-lg font-bold text-slate-500">
+                  Search for a product
+                </p>
+
+                <p className="mt-1 text-sm">
+                  Enter barcode, name or brand
+                </p>
+              </div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="flex min-h-[320px] items-center justify-center">
+              <div className="text-center text-slate-400">
+                <ScanBarcode className="mx-auto h-12 w-12" />
+
+                <p className="mt-4 text-lg font-bold text-slate-500">
+                  Product not found
+                </p>
+
+                <p className="mt-1 text-sm">
+                  Try another barcode or product name
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredProducts.map((product) => (
+                <button
+                  key={product.id}
+                  type="button"
+                  onClick={() => {
+                    addScannedProduct(product);
+                    setSearch("");
+                    setShowProductSearch(false);
+                  }}
+                  className="flex w-full items-center gap-5 rounded-[22px] border border-white/80 bg-white/70 p-4 text-left shadow-[0_8px_24px_rgba(15,23,42,0.07)] backdrop-blur-xl transition hover:border-emerald-300 hover:bg-emerald-50/70"
+                >
+                  <div className="flex h-[70px] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-slate-100 bg-white">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="h-full w-full object-contain p-2"
+                      />
+                    ) : (
+                      <ScanBarcode className="h-8 w-8 text-slate-300" />
+                    )}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-base font-bold text-slate-800">
+                      {product.name}
+                    </p>
+
+                    {product.brand && (
+                      <p className="mt-1 truncate text-sm font-semibold text-slate-500">
+                        {product.brand}
+                      </p>
+                    )}
+
+                    <p className="mt-2 font-mono text-xs text-slate-400">
+                      {product.barcode || `P-${product.id}`}
+                    </p>
+                  </div>
+
+                  <div className="w-[90px] shrink-0 text-center">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Stock
+                    </p>
+
+                    <p
+                      className={`mt-1 text-lg font-bold ${
+                        product.stock > 0
+                          ? "text-emerald-600"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {product.stock}
+                    </p>
+                  </div>
+
+                  <div className="w-[120px] shrink-0 text-right">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Price
+                    </p>
+
+                    <p className="mt-1 text-2xl font-black text-[#b88932]">
+                      ${product.price.toFixed(2)}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+      
+{/* Delivery */}
+      {showDeliveryModal && (
+        <div
+          className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/35 p-5 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeDeliveryModal();
+          }}
+        >
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              saveDelivery();
+            }}
+            className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-emerald-200/70 bg-[#fffaf0]/95 shadow-[0_30px_80px_rgba(15,23,42,0.28)] backdrop-blur-[30px]"
+          >
+            <div className="flex items-center justify-between bg-[linear-gradient(135deg,rgba(4,120,87,0.90),rgba(52,211,153,0.78))] px-7 py-5 text-white">
+              <div>
+                <p className="font-khmer text-sm text-white/80">ការដឹកជញ្ជូន</p>
+                <h2 className="mt-1 text-2xl font-bold">Delivery</h2>
+                <p className="mt-1 text-sm text-white/75">ព័ត៌មានដឹកជញ្ជូនសម្រាប់ការលក់នេះ · Delivery details for this sale</p>
+              </div>
+              <button type="button" onClick={closeDeliveryModal} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/15">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 p-7">
+              <div className="grid grid-cols-2 gap-4">
+                <input value={deliveryName} onChange={(e) => setDeliveryName(e.target.value)} placeholder="ឈ្មោះអតិថិជន / Customer name" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-emerald-400" />
+                <input value={deliveryPhone} onChange={(e) => setDeliveryPhone(e.target.value)} placeholder="លេខទូរស័ព្ទ / Phone number" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-emerald-400" />
+              </div>
+              <textarea value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="អាសយដ្ឋានដឹកជញ្ជូន / Delivery address" rows={3} className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-emerald-400" />
+              <div>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">ថ្លៃដឹកជញ្ជូន / Delivery Fee (USD)</label>
+                <input type="number" min="0" step="0.01" value={deliveryFee} onChange={(e) => setDeliveryFee(e.target.value)} placeholder="1.50" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg font-bold outline-none focus:border-emerald-400" />
+              </div>
+              <textarea value={deliveryNote} onChange={(e) => setDeliveryNote(e.target.value)} placeholder="កំណត់ចំណាំ (ស្រេចចិត្ត) / Note (optional)" rows={2} className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-emerald-400" />
+
+              <div className="flex gap-3 pt-2">
+                {isDelivery && (
+                  <button type="button" onClick={removeDelivery} className="rounded-full border border-red-200 px-5 py-3 font-semibold text-red-500">លុប / Remove</button>
+                )}
+                <button type="button" onClick={closeDeliveryModal} className="ml-auto rounded-full border border-slate-200 px-5 py-3 font-semibold text-slate-600">បោះបង់ / Cancel</button>
+                <button type="submit" className="rounded-full bg-emerald-600 px-6 py-3 font-bold text-white">រក្សាទុក / Save Delivery</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+{/* Member */}
       {showMemberModal && (
         <div
           className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/35 p-5 backdrop-blur-sm"
@@ -1354,8 +2196,9 @@ export default function PosPage() {
             <div className="bg-[linear-gradient(135deg,rgba(4,120,87,0.90),rgba(52,211,153,0.78))] px-7 py-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold">Member</h2>
-                  <p className="mt-1 text-sm text-white/75">Search by phone number or name</p>
+                  <p className="font-khmer text-sm text-white/80">សមាជិក</p>
+                  <h2 className="mt-1 text-2xl font-bold">Member</h2>
+                  <p className="mt-1 text-sm text-white/75">ស្វែងរកតាមលេខទូរស័ព្ទ ឬឈ្មោះ · Search by phone number or name</p>
                 </div>
 
                 <button
@@ -1384,7 +2227,7 @@ export default function PosPage() {
                     type="text"
                     value={memberSearch}
                     onChange={(event) => setMemberSearch(event.target.value)}
-                    placeholder="Phone number or member name"
+                    placeholder="លេខទូរស័ព្ទ ឬឈ្មោះសមាជិក / Phone or member name"
                     className="min-w-0 flex-1 bg-transparent px-3 py-3.5 outline-none"
                   />
                 </div>
@@ -1394,7 +2237,7 @@ export default function PosPage() {
                   disabled={memberLoading}
                   className="rounded-2xl bg-emerald-600 px-5 font-bold text-white disabled:opacity-50"
                 >
-                  {memberLoading ? "Searching…" : "Search"}
+                  {memberLoading ? "កំពុងស្វែងរក…" : "ស្វែងរក / Search"}
                 </button>
               </form>
 
@@ -1426,7 +2269,7 @@ export default function PosPage() {
                       </div>
 
                       <div className="shrink-0 text-right">
-                        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Points</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">ពិន្ទុ / Points</p>
                         <p className="mt-1 text-xl font-black text-emerald-700">
                           {member.points.toLocaleString()}
                         </p>
@@ -1439,7 +2282,7 @@ export default function PosPage() {
               {selectedMember && (
                 <div className="mt-4 flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wide text-emerald-600">Selected member</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-emerald-600">សមាជិកដែលបានជ្រើស / Selected member</p>
                     <p className="mt-1 font-bold text-slate-800">{selectedMember.name}</p>
                   </div>
                   <button
@@ -1467,23 +2310,23 @@ export default function PosPage() {
                     }}
                     className="w-full rounded-2xl border border-emerald-200 bg-white py-3.5 font-bold text-emerald-700 hover:bg-emerald-50"
                   >
-                    + New Member
+                    + សមាជិកថ្មី / New Member
                   </button>
                 ) : (
                   <div className="space-y-3 rounded-2xl border border-emerald-200 bg-white p-4">
-                    <h3 className="font-bold text-slate-800">New Member</h3>
+                    <h3 className="font-bold text-slate-800">សមាជិកថ្មី / New Member</h3>
                     <input
                       type="text"
                       value={newMemberName}
                       onChange={(event) => setNewMemberName(event.target.value)}
-                      placeholder="Customer name"
+                      placeholder="ឈ្មោះអតិថិជន / Customer name"
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-emerald-400"
                     />
                     <input
                       type="tel"
                       value={newMemberPhone}
                       onChange={(event) => setNewMemberPhone(event.target.value)}
-                      placeholder="Phone number"
+                      placeholder="លេខទូរស័ព្ទ / Phone number"
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-emerald-400"
                     />
                     <div className="grid grid-cols-2 gap-3">
@@ -1496,7 +2339,7 @@ export default function PosPage() {
                         }}
                         className="rounded-xl border border-slate-200 py-3 font-bold text-slate-600"
                       >
-                        Cancel
+                        បោះបង់ / Cancel
                       </button>
                       <button
                         type="button"
@@ -1504,7 +2347,7 @@ export default function PosPage() {
                         onClick={() => void createMember()}
                         className="rounded-xl bg-emerald-600 py-3 font-bold text-white disabled:opacity-50"
                       >
-                        Create & Use
+                        បង្កើត និងប្រើ / Create & Use
                       </button>
                     </div>
                   </div>
@@ -1722,9 +2565,11 @@ export default function PosPage() {
                         type="button"
                         tabIndex={-1}
                         onClick={() => {
-                          setReceivedUSD(String(amount));
-                          window.setTimeout(() => cashKhrRef.current?.focus(), 0);
-                        }}
+                        setReceivedUSD((current) =>
+                        String((Number(current) || 0) + amount)
+                         );
+                         window.setTimeout(() => cashKhrRef.current?.focus(), 0);
+                         }}
                         className="rounded-xl border border-emerald-100 bg-emerald-50 px-2 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
                       >
                         ${amount}
@@ -1763,8 +2608,10 @@ export default function PosPage() {
                         type="button"
                         tabIndex={-1}
                         onClick={() => {
-                          setReceivedKHR(String(amount));
-                          window.setTimeout(() => cashKhrRef.current?.focus(), 0);
+                        setReceivedKHR((current) =>
+                        String((Number(current) || 0) + amount)
+                        );
+                        window.setTimeout(() => cashKhrRef.current?.focus(), 0);
                         }}
                         className="rounded-xl border border-emerald-100 bg-emerald-50 px-1 py-2 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100"
                       >

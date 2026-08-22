@@ -10,7 +10,7 @@ export default function HeroBanner() {
   return (
     <section className="glass mt-3 overflow-hidden rounded-[36px] p-6">
       <p className="text-xs font-semibold tracking-[0.28em] text-gold">
-        BABY PREMIUM+
+        BABY PREMIUM & ESSENTIALS
       </p>
 
       <h2
@@ -27,7 +27,7 @@ export default function HeroBanner() {
           </>
         ) : (
           <>
-            Everyday Essentials for Babies
+            Original Products
             
           </>
         )}
