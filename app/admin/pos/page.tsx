@@ -1196,7 +1196,7 @@ export default function PosPage() {
                 
 
                 <div className="text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.35)]">
-                  <p className="font-khmer text-base leading-7 text-white/80">
+                  <p className="font-khmer text-[28px] leading-7 text-white/80">
                     សូមស្វាគមន៍
                   </p>
                   <h1 className="text-[30px] font-bold leading-tight">Welcome</h1>
@@ -1213,9 +1213,9 @@ export default function PosPage() {
               onClick={handleLogout}
               aria-label="Sign out"
               title="Sign out"
-              className="absolute right-6 top-1/2 z-30 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/45 bg-black/15 text-white shadow-[0_8px_22px_rgba(15,23,42,0.18)] backdrop-blur-xl transition hover:bg-red-500/65"
+              className="absolute right-6 top-1/2 z-30 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/45 bg-black/15 text-white shadow-[0_8px_22px_rgba(15,23,42,0.18)] backdrop-blur-xl transition hover:bg-red-500/65"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
 
@@ -1294,7 +1294,7 @@ export default function PosPage() {
         <div
           key={product.scanId}
           title={product.name}
-          className="scanned-product-enter relative flex h-[100px] w-[100px] shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/80 bg-white/55 shadow-[0_12px_30px_rgba(23,36,59,0.18),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-[24px]"
+          className="scanned-product-enter relative flex h-[90px] w-[90px] shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/80 bg-white/55 shadow-[0_12px_30px_rgba(23,36,59,0.18),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-[24px]"
         >
           {product.image ? (
             <img
@@ -1321,7 +1321,7 @@ export default function PosPage() {
             onClick={() => setShowBackgroundSettings(true)}
             aria-label="Background settings"
             title="Background settings"
-            className="absolute bottom-3 right-5 z-[90] flex h-9 w-9 items-center justify-center rounded-full border border-white/70 bg-white/35 text-slate-600 shadow-sm backdrop-blur-xl transition active:scale-95"
+            className="absolute bottom-3 right-5 z-[90] flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-transparent text-emerald-600 shadow-sm backdrop-blur-xl transition active:scale-95"
           >
             <Settings className="h-4 w-4" />
           </button>
@@ -1436,7 +1436,7 @@ export default function PosPage() {
         return (
           <div
             key={item.id}
-            className="grid grid-cols-[180px_2fr_2fr_90px_110px_100px_120px_50px] items-center divide-x divide-slate-300/60 border-x border-b border-slate-300/60 bg-white/20 px-5 py-3 text-[12px]"
+            className="grid grid-cols-[180px_2fr_2fr_90px_110px_100px_120px_50px] items-center divide-x divide-slate-300/60 border-x border-b border-slate-300/60 bg-white/20 px-5 py-1 text-[12px]"
           >
             {/* Barcode */}
 
@@ -1482,7 +1482,7 @@ export default function PosPage() {
         Number(event.target.value)
       )
     }
-    className="w-[48px] bg-transparent text-right text-[13px] font-bold text-slate-700 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+    className="w-[48px] bg-transparent text-right text-[13px] font-bold text-emerald-700 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
   />
 
   <span className="ml-1 text-[11px] font-semibold text-emerald-600">
@@ -1550,7 +1550,7 @@ export default function PosPage() {
     )}
 
     {isDelivery && (
-      <div className="grid grid-cols-[180px_2fr_2fr_90px_110px_100px_120px_50px] items-center divide-x divide-slate-300/60 border-x border-b border-slate-300/60 bg-white/20 px-5 py-3 text-[12px]">
+      <div className="grid grid-cols-[180px_2fr_2fr_90px_110px_100px_120px_50px] items-center divide-x divide-slate-300/60 border-x border-b border-slate-300/60 bg-white/20 px-5 py-2 text-[12px]">
         {/* Delivery code */}
         <div className="min-w-0 pr-2">
           <p className="truncate font-mono text-xs font-bold text-emerald-600">
@@ -2170,7 +2170,7 @@ export default function PosPage() {
                 <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">ថ្លៃដឹកជញ្ជូន / Delivery Fee (USD)</label>
                 <input type="number" min="0" step="0.01" value={deliveryFee} onChange={(e) => setDeliveryFee(e.target.value)} placeholder="1.50" className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-lg font-bold outline-none focus:border-emerald-400" />
               </div>
-              <textarea value={deliveryNote} onChange={(e) => setDeliveryNote(e.target.value)} placeholder="កំណត់ចំណាំ (ស្រេចចិត្ត) / Note (optional)" rows={2} className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-emerald-400" />
+              <textarea value={deliveryNote} onChange={(e) => setDeliveryNote(e.target.value)} placeholder="កំណត់ចំណាំ / Note (optional)" rows={2} className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:border-emerald-400" />
 
               <div className="flex gap-3 pt-2">
                 {isDelivery && (
@@ -2347,7 +2347,7 @@ export default function PosPage() {
                         onClick={() => void createMember()}
                         className="rounded-xl bg-emerald-600 py-3 font-bold text-white disabled:opacity-50"
                       >
-                        បង្កើត និងប្រើ / Create & Use
+                        បង្កើត / Create
                       </button>
                     </div>
                   </div>
@@ -2489,219 +2489,308 @@ export default function PosPage() {
       )}
 
       {/* Cash payment */}
-      {showCashPayment && (
-        <div
-          className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-950/35 p-5 backdrop-blur-sm"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeCashPayment();
-          }}
-        >
-          <div className="w-full max-w-[620px] overflow-hidden rounded-[30px] border border-emerald-200/70 bg-white/95 shadow-[0_30px_90px_rgba(15,23,42,0.30)] backdrop-blur-[30px]">
-            <div className="bg-[linear-gradient(135deg,rgba(4,120,87,0.90),rgba(52,211,153,0.78))] px-7 py-5 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-khmer text-sm text-white/75">ការទូទាត់សាច់ប្រាក់</p>
-                  <h2 className="mt-1 text-2xl font-bold">Cash Payment</h2>
-                </div>
+{showCashPayment && (
+  <div
+    className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-950/35 p-5 backdrop-blur-sm"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) closeCashPayment();
+    }}
+  >
+    <div className="w-full max-w-[620px] overflow-hidden rounded-[30px] border border-emerald-200/70 bg-white/95 shadow-[0_30px_90px_rgba(15,23,42,0.30)] backdrop-blur-[30px]">
 
-                <button
-                  type="button"
-                  onClick={closeCashPayment}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/15 transition hover:bg-white/25"
-                  aria-label="Close cash payment"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+      {/* Header */}
+      <div className="bg-[linear-gradient(135deg,rgba(4,120,87,0.90),rgba(52,211,153,0.78))] px-7 py-3 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-khmer text-sm text-white/75">
+              ការទូទាត់សាច់ប្រាក់
+            </p>
+
+            <h2 className="mt-0.5 text-xl font-bold">
+              Cash Payment
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={closeCashPayment}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/15 transition hover:bg-white/25"
+            aria-label="Close cash payment"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-7 py-4">
+
+        {/* Total */}
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-5 py-3">
+          <div className="flex items-center justify-between gap-5">
+            <div>
+              <p className="font-khmer text-xs text-slate-500">
+                តម្លៃសរុប
+              </p>
+
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                Total Amount
+              </p>
             </div>
 
-            <div className="p-7">
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5">
-                <div className="flex items-center justify-between gap-5">
-                  <div>
-                    <p className="font-khmer text-sm text-slate-500">តម្លៃសរុប</p>
-                    <p className="text-sm font-bold uppercase tracking-[0.12em] text-slate-500">Total Amount</p>
-                  </div>
+            <div className="text-right">
+              <p className="text-2xl font-black text-emerald-700">
+                ${subtotal.toFixed(2)}
+              </p>
 
-                  <div className="text-right">
-                    <p className="text-3xl font-black text-emerald-700">
-                      ${subtotal.toFixed(2)}
-                    </p>
-                    <p className="mt-1 text-sm font-bold text-slate-400">
-                      {totalKHR.toLocaleString()} ៛
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-4">
-                <div>
-                  <div className="mb-2">
-                    <p className="font-khmer text-sm text-slate-500">ប្រាក់ទទួល ដុល្លារ</p>
-                    <label className="text-sm font-bold uppercase tracking-[0.10em] text-slate-500">
-                      Received USD
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      ref={cashUsdRef}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={receivedUSD}
-                      onChange={(event) => setReceivedUSD(event.target.value)}
-                      onKeyDown={handleCashKeyDown}
-                      placeholder="0.00"
-                      className="h-[70px] w-full rounded-2xl border-2 border-emerald-200 bg-white px-5 pr-14 text-right text-2xl font-black text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                    />
-                    <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-xl font-bold text-slate-400">$</span>
-                  </div>
-
-                  <div className="mt-2 grid grid-cols-4 gap-1.5">
-                    {[10, 20, 50, 100].map((amount) => (
-                      <button
-                        key={amount}
-                        type="button"
-                        tabIndex={-1}
-                        onClick={() => {
-                        setReceivedUSD((current) =>
-                        String((Number(current) || 0) + amount)
-                         );
-                         window.setTimeout(() => cashKhrRef.current?.focus(), 0);
-                         }}
-                        className="rounded-xl border border-emerald-100 bg-emerald-50 px-2 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
-                      >
-                        ${amount}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="mb-2">
-                    <p className="font-khmer text-sm text-slate-500">ប្រាក់ទទួល រៀល</p>
-                    <label className="text-sm font-bold uppercase tracking-[0.10em] text-slate-500">
-                      Received KHR
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      ref={cashKhrRef}
-                      type="number"
-                      min="0"
-                      step="100"
-                      value={receivedKHR}
-                      onChange={(event) => setReceivedKHR(event.target.value)}
-                      onKeyDown={handleCashKeyDown}
-                      placeholder="0"
-                      className="h-[70px] w-full rounded-2xl border-2 border-emerald-200 bg-white px-5 pr-14 text-right text-2xl font-black text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                    />
-                    <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-xl font-bold text-slate-400">៛</span>
-                  </div>
-
-                  <div className="mt-2 grid grid-cols-4 gap-1.5">
-                    {[10000, 20000, 50000, 100000].map((amount) => (
-                      <button
-                        key={amount}
-                        type="button"
-                        tabIndex={-1}
-                        onClick={() => {
-                        setReceivedKHR((current) =>
-                        String((Number(current) || 0) + amount)
-                        );
-                        window.setTimeout(() => cashKhrRef.current?.focus(), 0);
-                        }}
-                        className="rounded-xl border border-emerald-100 bg-emerald-50 px-1 py-2 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100"
-                      >
-                        {amount.toLocaleString()}៛
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-2xl border border-amber-200/70 bg-amber-50/70 p-4">
-                <div className="flex items-center justify-between gap-5">
-                  <div>
-                    <p className="font-khmer text-sm text-slate-500">ប្រាក់នៅខ្វះ</p>
-                    <p className="text-sm font-bold uppercase tracking-[0.10em] text-slate-600">Remaining</p>
-                  </div>
-
-                  <div className="text-right">
-                    <p className={`text-2xl font-black ${hasEnoughCash ? "text-emerald-700" : "text-amber-600"}`}>
-                      ${remainingUSD.toFixed(2)}
-                    </p>
-                    <p className={`text-sm font-bold ${hasEnoughCash ? "text-emerald-600" : "text-amber-500"}`}>
-                      {remainingKHR.toLocaleString()} ៛
-                    </p>
-                  </div>
-                </div>
-
-                {!hasEnoughCash && remainingKHR > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReceivedKHR(String(Math.max(0, Math.round((subtotal - receivedUSDNumber) * KHR_RATE))));
-                      window.setTimeout(() => cashKhrRef.current?.focus(), 0);
-                    }}
-                    className="mt-3 w-full rounded-xl border border-amber-200 bg-white/70 px-4 py-2.5 text-sm font-bold text-amber-700 transition hover:bg-white"
-                  >
-                    Pay remaining {Math.max(0, Math.round((subtotal - receivedUSDNumber) * KHR_RATE)).toLocaleString()}៛
-                  </button>
-                )}
-              </div>
-
-              <div className="mt-5 border-t border-emerald-100 pt-5">
-                <div className="flex items-center justify-between gap-5">
-                  <div>
-                    <p className="font-khmer text-sm text-slate-500">ប្រាក់អាប់</p>
-                    <p className="text-lg font-bold uppercase tracking-[0.10em] text-slate-600">Change</p>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="text-3xl font-black text-emerald-700">
-                      ${changeUSD.toFixed(2)}
-                    </p>
-                    <p className="mt-1 text-sm font-bold text-emerald-600">
-                      {changeKHR.toLocaleString()} ៛
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-center text-xs font-medium text-slate-400">
-                Received total ≈ ${totalReceivedUSD.toFixed(2)} • Exchange rate: $1 = {KHR_RATE.toLocaleString()} ៛
-              </div>
-
-              <div className="mt-6 grid grid-cols-[140px_1fr] gap-3">
-                <button
-                  type="button"
-                  onClick={closeCashPayment}
-                  className="rounded-2xl border border-slate-200 bg-white px-5 py-4 font-bold text-slate-600 transition hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="button"
-                  disabled={!hasEnoughCash}
-                  onClick={completeCashPayment}
-                  className="rounded-2xl bg-emerald-600 px-5 py-4 text-lg font-bold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-                >
-                  Confirm Payment
-                </button>
-              </div>
-
-              <p className="mt-3 text-center text-xs text-slate-400">
-                Enter USD and/or KHR • Press Enter to confirm • Esc to cancel
+              <p className="mt-0.5 text-xs font-bold text-slate-400">
+                {totalKHR.toLocaleString()} ៛
               </p>
             </div>
           </div>
         </div>
-      )}
 
+        {/* Received USD + KHR */}
+        <div className="mt-3 grid grid-cols-2 gap-3">
+
+          {/* USD */}
+          <div>
+            <div className="mb-1.5">
+              <p className="font-khmer text-xs text-slate-500">
+                ប្រាក់ទទួល ដុល្លារ
+              </p>
+
+              <label className="text-xs font-bold uppercase tracking-[0.10em] text-slate-500">
+                Received USD
+              </label>
+            </div>
+
+            <div className="relative">
+              <input
+                ref={cashUsdRef}
+                type="number"
+                min="0"
+                step="0.01"
+                value={receivedUSD}
+                onChange={(event) => setReceivedUSD(event.target.value)}
+                onKeyDown={handleCashKeyDown}
+                placeholder="0.00"
+                className="h-[54px] w-full rounded-2xl border-2 border-emerald-200 bg-white px-4 pr-12 text-right text-xl font-black text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              />
+
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                $
+              </span>
+            </div>
+
+            <div className="mt-1.5 grid grid-cols-4 gap-1.5">
+              {[10, 20, 50, 100].map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => {
+                    setReceivedUSD((current) =>
+                      String((Number(current) || 0) + amount)
+                    );
+
+                    window.setTimeout(
+                      () => cashKhrRef.current?.focus(),
+                      0
+                    );
+                  }}
+                  className="rounded-xl border border-emerald-100 bg-emerald-50 px-2 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
+                >
+                  ${amount}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* KHR */}
+          <div>
+            <div className="mb-1.5">
+              <p className="font-khmer text-xs text-slate-500">
+                ប្រាក់ទទួល រៀល
+              </p>
+
+              <label className="text-xs font-bold uppercase tracking-[0.10em] text-slate-500">
+                Received KHR
+              </label>
+            </div>
+
+            <div className="relative">
+              <input
+                ref={cashKhrRef}
+                type="number"
+                min="0"
+                step="100"
+                value={receivedKHR}
+                onChange={(event) => setReceivedKHR(event.target.value)}
+                onKeyDown={handleCashKeyDown}
+                placeholder="0"
+                className="h-[54px] w-full rounded-2xl border-2 border-emerald-200 bg-white px-4 pr-12 text-right text-xl font-black text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              />
+
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                ៛
+              </span>
+            </div>
+
+            <div className="mt-1.5 grid grid-cols-4 gap-1.5">
+              {[10000, 20000, 50000, 100000].map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => {
+                    setReceivedKHR((current) =>
+                      String((Number(current) || 0) + amount)
+                    );
+
+                    window.setTimeout(
+                      () => cashKhrRef.current?.focus(),
+                      0
+                    );
+                  }}
+                  className="rounded-xl border border-emerald-100 bg-emerald-50 px-1 py-1.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100"
+                >
+                  {amount.toLocaleString()}៛
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Remaining */}
+        <div className="mt-3 rounded-2xl border border-amber-200/70 bg-amber-50/70 px-4 py-2">
+          <div className="flex items-center justify-between gap-5">
+            <div>
+              <p className="font-khmer text-xs text-slate-500">
+                ប្រាក់នៅខ្វះ
+              </p>
+
+              <p className="text-xs font-bold uppercase tracking-[0.10em] text-slate-600">
+                Remaining
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p
+                className={`text-xl font-black ${
+                  hasEnoughCash
+                    ? "text-emerald-700"
+                    : "text-amber-600"
+                }`}
+              >
+                ${remainingUSD.toFixed(2)}
+              </p>
+
+              <p
+                className={`text-xs font-bold ${
+                  hasEnoughCash
+                    ? "text-emerald-600"
+                    : "text-amber-500"
+                }`}
+              >
+                {remainingKHR.toLocaleString()} ៛
+              </p>
+            </div>
+          </div>
+
+          {!hasEnoughCash && remainingKHR > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setReceivedKHR(
+                  String(
+                    Math.max(
+                      0,
+                      Math.round(
+                        (subtotal - receivedUSDNumber) * KHR_RATE
+                      )
+                    )
+                  )
+                );
+
+                window.setTimeout(
+                  () => cashKhrRef.current?.focus(),
+                  0
+                );
+              }}
+              className="mt-2 w-full rounded-xl border border-amber-200 bg-white/70 px-4 py-2 text-xs font-bold text-amber-700 transition hover:bg-white"
+            >
+              Pay remaining{" "}
+              {Math.max(
+                0,
+                Math.round(
+                  (subtotal - receivedUSDNumber) * KHR_RATE
+                )
+              ).toLocaleString()}
+              ៛
+            </button>
+          )}
+        </div>
+
+        {/* Change */}
+        <div className="mt-3 border-t border-emerald-100 pt-3">
+          <div className="flex items-center justify-between gap-5">
+            <div>
+              <p className="font-khmer text-xs text-slate-500">
+                ប្រាក់អាប់
+              </p>
+
+              <p className="text-sm font-bold uppercase tracking-[0.10em] text-slate-600">
+                Change
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-2xl font-black text-emerald-700">
+                ${changeUSD.toFixed(2)}
+              </p>
+
+              <p className="mt-0.5 text-xs font-bold text-emerald-600">
+                {changeKHR.toLocaleString()} ៛
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Exchange info */}
+        <div className="mt-3 rounded-xl bg-slate-50 px-4 py-2 text-center text-[11px] font-medium text-slate-400">
+          Received total ≈ ${totalReceivedUSD.toFixed(2)}
+          {" • "}
+          Exchange rate: $1 = {KHR_RATE.toLocaleString()} ៛
+        </div>
+
+        {/* Buttons */}
+        <div className="mt-3 grid grid-cols-[140px_1fr] gap-3">
+          <button
+            type="button"
+            onClick={closeCashPayment}
+            className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-bold text-slate-600 transition hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            disabled={!hasEnoughCash}
+            onClick={completeCashPayment}
+            className="rounded-2xl bg-emerald-600 px-5 py-3 text-base font-bold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+          >
+            Confirm Payment
+          </button>
+        </div>
+
+        <p className="mt-2 text-center text-[11px] text-slate-400">
+          Enter USD and/or KHR • Press Enter to confirm • Esc to cancel
+        </p>
+      </div>
+    </div>
+  </div>
+)}
       {/* Background settings */}
 
       {showBackgroundSettings && (
