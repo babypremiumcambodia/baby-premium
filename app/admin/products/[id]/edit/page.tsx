@@ -22,7 +22,7 @@ const subcategoryOptions: Record<string, string[]> = {
     "Pregnancy",
   ],
   "Food & Nutrition": [
-    "Cereals",
+    "Cereal",
     "Snacks",
     "Yogurt",
     "Vitamins & Supplements",
@@ -134,7 +134,11 @@ export default function EditProductPage() {
       URL.revokeObjectURL(selectedImage);
     }
 
-    setSelectedImage(URL.createObjectURL(file));
+    const temporaryUrl = URL.createObjectURL(file);
+
+    setSelectedImage(temporaryUrl);
+
+    // Allows selecting the same file again if needed.
     event.target.value = "";
   }
 
@@ -149,8 +153,16 @@ export default function EditProductPage() {
         cropArea
       );
 
+      /*
+       * IMPORTANT:
+       * Every replacement gets a NEW filename.
+       *
+       * We do not overwrite the previous image.
+       * This prevents the browser/Supabase CDN from
+       * continuing to display an old cached image.
+       */
       const fileName =
-        `products/${Date.now()}-product.png`;
+        `products/${id}-${Date.now()}-product.png`;
 
       const { error: uploadError } =
         await supabase.storage
@@ -169,12 +181,28 @@ export default function EditProductPage() {
         .from("product-images")
         .getPublicUrl(fileName);
 
+      const newImageUrl = data.publicUrl;
+
+      if (!newImageUrl) {
+        throw new Error(
+          "Could not get the new product image URL."
+        );
+      }
+
+      /*
+       * Put the NEW URL into the form.
+       * handleSave() will save this URL to products.image.
+       */
       setForm((previous) => ({
         ...previous,
-        image: data.publicUrl,
+        image: newImageUrl,
       }));
 
-      setPreview(data.publicUrl);
+      /*
+       * Immediately show the newly uploaded image
+       * in the Edit Product preview.
+       */
+      setPreview(newImageUrl);
 
       URL.revokeObjectURL(selectedImage);
       setSelectedImage("");
@@ -218,41 +246,75 @@ export default function EditProductPage() {
       return;
     }
 
-    setSaving(true);
-
-    const { error } = await supabase
-      .from("products")
-      .update({
-        name: form.name.trim(),
-        brand: form.brand.trim(),
-        category: form.category,
-        subcategory: form.subcategory,
-        price: Number(form.price),
-        stock: Number(form.stock),
-        barcode: form.barcode.trim(),
-        description: form.description.trim(),
-        image: form.image,
-      })
-      .eq("id", id);
-
-    setSaving(false);
-
-    if (error) {
-      alert(error.message);
+    if (!id || Number.isNaN(id)) {
+      alert("Invalid product ID.");
       return;
     }
 
-    alert("Product updated!");
-    router.push("/admin/products");
+    setSaving(true);
+
+    try {
+      /*
+       * Save everything, including the NEW image URL.
+       *
+       * .select().single() makes Supabase return the
+       * updated product so we can confirm the update
+       * actually happened.
+       */
+      const { data, error } = await supabase
+        .from("products")
+        .update({
+          name: form.name.trim(),
+          brand: form.brand.trim(),
+          category: form.category,
+          subcategory: form.subcategory,
+          price: Number(form.price),
+          stock: Number(form.stock),
+          barcode: form.barcode.trim(),
+          description: form.description.trim(),
+          image: form.image,
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error("Product was not updated.");
+      }
+
+      alert("Product updated!");
+
+      /*
+       * Go back to Products and refresh the route
+       * so the latest product information/image is used.
+       */
+      router.push("/admin/products");
+      router.refresh();
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Could not update the product."
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <main className="min-h-screen bg-premium">
       <div className="mx-auto max-w-xl px-5 py-8">
+
+        {/* Back */}
         <div className="mb-6">
           <AdminBackButton />
         </div>
 
+        {/* Title */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold">
             Edit Product
@@ -260,6 +322,8 @@ export default function EditProductPage() {
         </div>
 
         <div className="space-y-4">
+
+          {/* Product name */}
           <input
             name="name"
             placeholder="Product Name"
@@ -268,6 +332,7 @@ export default function EditProductPage() {
             className="w-full rounded-xl border p-4"
           />
 
+          {/* Brand */}
           <input
             name="brand"
             placeholder="Brand"
@@ -276,22 +341,39 @@ export default function EditProductPage() {
             className="w-full rounded-xl border p-4"
           />
 
+          {/* Category */}
           <select
             name="category"
             value={form.category}
             onChange={handleCategoryChange}
             className="w-full rounded-xl border bg-white p-4"
           >
-            <option value="">Select Category</option>
-            <option value="Formula">Formula</option>
-            <option value="Milk">Milk</option>
+            <option value="">
+              Select Category
+            </option>
+
+            <option value="Formula">
+              Formula
+            </option>
+
+            <option value="Milk">
+              Milk
+            </option>
+
             <option value="Food & Nutrition">
               Food & Nutrition
             </option>
-            <option value="Diapers">Diapers</option>
-            <option value="Essentials">Essentials</option>
+
+            <option value="Diapers">
+              Diapers
+            </option>
+
+            <option value="Essentials">
+              Essentials
+            </option>
           </select>
 
+          {/* Subcategory */}
           {form.category && (
             <select
               name="subcategory"
@@ -299,11 +381,16 @@ export default function EditProductPage() {
               onChange={handleChange}
               className="w-full rounded-xl border bg-white p-4"
             >
-              <option value="">Select Product Type</option>
+              <option value="">
+                Select Product Type
+              </option>
 
               {(subcategoryOptions[form.category] ?? []).map(
                 (option) => (
-                  <option key={option} value={option}>
+                  <option
+                    key={option}
+                    value={option}
+                  >
                     {option}
                   </option>
                 )
@@ -311,6 +398,7 @@ export default function EditProductPage() {
             </select>
           )}
 
+          {/* Price */}
           <input
             name="price"
             type="number"
@@ -322,6 +410,7 @@ export default function EditProductPage() {
             className="w-full rounded-xl border p-4"
           />
 
+          {/* Stock */}
           <input
             name="stock"
             type="number"
@@ -333,6 +422,7 @@ export default function EditProductPage() {
             className="w-full rounded-xl border p-4"
           />
 
+          {/* Barcode */}
           <BarcodeInput
             value={form.barcode}
             onChange={(code) =>
@@ -343,6 +433,7 @@ export default function EditProductPage() {
             }
           />
 
+          {/* Replace image */}
           <label className="block rounded-xl border bg-white p-4">
             <span className="font-semibold">
               Replace Product Image
@@ -356,9 +447,11 @@ export default function EditProductPage() {
             />
           </label>
 
+          {/* Current / replacement image preview */}
           {preview && (
             <div className="rounded-[24px] border border-white/70 bg-white/30 p-4">
               <img
+                key={preview}
                 src={preview}
                 alt="Product preview"
                 className="mx-auto aspect-square w-full max-w-[260px] object-contain"
@@ -370,6 +463,7 @@ export default function EditProductPage() {
             </div>
           )}
 
+          {/* Description */}
           <textarea
             name="description"
             placeholder="Description"
@@ -378,17 +472,23 @@ export default function EditProductPage() {
             className="h-40 w-full rounded-xl border p-4"
           />
 
+          {/* Save */}
           <button
             type="button"
             disabled={saving || uploading}
             onClick={handleSave}
             className="w-full rounded-full bg-gold py-4 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save Changes"}
+            {uploading
+              ? "Uploading Image…"
+              : saving
+                ? "Saving…"
+                : "Save Changes"}
           </button>
         </div>
       </div>
 
+      {/* Image cropper */}
       {selectedImage && (
         <ProductImageCropper
           image={selectedImage}

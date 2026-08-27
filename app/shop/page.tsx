@@ -2,11 +2,16 @@ import { Suspense } from "react";
 import ShopClient from "@/components/shop/ShopClient";
 import { getProducts } from "@/lib/products";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ShopPage() {
   const products = await getProducts();
 
   return (
-    <Suspense fallback={<div className="p-6">Loading shop...</div>}>
+    <Suspense
+      fallback={<div className="p-6">Loading shop...</div>}
+    >
       <ShopClient products={products} />
     </Suspense>
   );
